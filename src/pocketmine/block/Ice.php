@@ -32,7 +32,7 @@ class Ice extends Transparent {
 
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Ice";
 	}
 
@@ -48,9 +48,5 @@ class Ice extends Transparent {
 		$this->getLevel()->setBlock($this, new Water(), true);
 
 		return true;
-	}
-
-	public function getDrops(Item $item) {
-		return [];
 	}
 }

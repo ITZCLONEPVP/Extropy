@@ -23,7 +23,8 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\math\AxisAlignedBB;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
@@ -37,9 +38,17 @@ class EnchantingTable extends Transparent {
 
 	}
 
+	public function getLightLevel() {
+		return 12;
+	}
+
+	public function getBoundingBox() {
+		return new AxisAlignedBB($this->x, $this->y, $this->z, $this->x + 1, $this->y + 0.75, $this->z + 1);
+	}
+
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
 		$this->getLevel()->setBlock($block, $this, true, true);
-		$nbt = new Compound("", [new StringTag("id", Tile::ENCHANT_TABLE), new IntTag("x", $this->x), new IntTag("y", $this->y), new IntTag("z", $this->z)]);
+		$nbt = new CompoundTag("", [new StringTag("id", Tile::ENCHANT_TABLE), new IntTag("x", $this->x), new IntTag("y", $this->y), new IntTag("z", $this->z)]);
 
 		if($item->hasCustomName()) {
 			$nbt->CustomName = new StringTag("CustomName", $item->getCustomName());
@@ -56,7 +65,7 @@ class EnchantingTable extends Transparent {
 		return true;
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
@@ -68,7 +77,7 @@ class EnchantingTable extends Transparent {
 		return 6000;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Enchanting Table";
 	}
 
@@ -77,19 +86,10 @@ class EnchantingTable extends Transparent {
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
-		if($player instanceof Player) {
-			//TODO lock
-			if($player->isCreative()) {
-				return true;
-			}
-
-			//			$player->addWindow(new EnchantInventory($this));
-		}
-
 		return true;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[$this->id, 0, 1],];
 		} else {

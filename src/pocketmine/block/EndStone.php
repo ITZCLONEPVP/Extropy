@@ -32,7 +32,7 @@ class EndStone extends Solid {
 
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "End Stone";
 	}
 

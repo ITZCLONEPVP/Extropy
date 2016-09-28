@@ -49,7 +49,7 @@ class StoneWall extends Transparent {
 		return 2;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		if($this->meta === 0x01) {
 			return "Mossy Cobblestone Wall";
 		}

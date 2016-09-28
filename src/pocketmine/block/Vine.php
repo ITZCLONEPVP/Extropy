@@ -24,7 +24,6 @@ namespace pocketmine\block;
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
-use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 
@@ -40,7 +39,7 @@ class Vine extends Transparent {
 		return false;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Vines";
 	}
 
@@ -74,19 +73,7 @@ class Vine extends Transparent {
 		return false;
 	}
 
-	public function onUpdate($type) {
-		if($type === Level::BLOCK_UPDATE_NORMAL) {
-			/*if($this->getSide(0)->getId() === self::AIR){ //Replace with common break method
-				Server::getInstance()->api->entity->drop($this, Item::get(LADDER, 0, 1));
-				$this->getLevel()->setBlock($this, new Air(), true, true, true);
-				return Level::BLOCK_UPDATE_NORMAL;
-			}*/
-		}
-
-		return false;
-	}
-
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isShears()) {
 			return [[$this->id, 0, 1],];
 		} else {
@@ -95,7 +82,7 @@ class Vine extends Transparent {
 	}
 
 	public function getToolType() {
-		return Tool::TYPE_AXE;
+		return Tool::TYPE_SHEARS;
 	}
 
 	protected function recalculateBoundingBox() {

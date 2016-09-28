@@ -24,6 +24,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 
 
@@ -35,7 +36,7 @@ class GrassPath extends Transparent {
 
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Grass Path";
 	}
 
@@ -43,11 +44,24 @@ class GrassPath extends Transparent {
 		return Tool::TYPE_SHOVEL;
 	}
 
+	public function onUpdate($type) {
+		if($type == Level::BLOCK_UPDATE_NORMAL) {
+			$block = $this->getSide(self::SIDE_UP);
+			if($block->getId() != self::AIR) {
+				$this->getLevel()->setBlock($this, new Dirt(), true);
+			}
+
+			return Level::BLOCK_UPDATE_NORMAL;
+		}
+
+		return false;
+	}
+
 	public function getHardness() {
 		return 0.6;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[Item::DIRT, 0, 1],];
 	}
 

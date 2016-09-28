@@ -27,7 +27,7 @@ class RemoteConsoleCommandSender extends ConsoleCommandSender {
 	/** @var string */
 	private $messages = "";
 
-	public function sendMessage($message) {
+	public function sendMessage(string $message) {
 		$this->messages .= trim($message, "\r\n") . "\n";
 	}
 
@@ -35,7 +35,7 @@ class RemoteConsoleCommandSender extends ConsoleCommandSender {
 		return $this->messages;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Rcon";
 	}
 

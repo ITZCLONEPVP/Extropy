@@ -24,7 +24,7 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Glowstone extends Transparent {
+class Glowstone extends Transparent implements SolidLight {
 
 	protected $id = self::GLOWSTONE_BLOCK;
 
@@ -32,7 +32,7 @@ class Glowstone extends Transparent {
 
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Glowstone";
 	}
 
@@ -48,7 +48,9 @@ class Glowstone extends Transparent {
 		return 15;
 	}
 
-	public function getDrops(Item $item) {
-		return [[Item::GLOWSTONE_DUST, 0, mt_rand(2, 4)],];
+	public function getDrops(Item $item) : array {
+		$num = mt_rand(2, 4);
+
+		return [[Item::GLOWSTONE_DUST, 0, $num],];
 	}
 }

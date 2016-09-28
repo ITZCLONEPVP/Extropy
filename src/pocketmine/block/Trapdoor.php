@@ -35,7 +35,7 @@ class Trapdoor extends Transparent {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Wooden Trapdoor";
 	}
 
@@ -43,31 +43,37 @@ class Trapdoor extends Transparent {
 		return 3;
 	}
 
-	public function canBeActivated() {
+	public function getResistance() {
+		return 15;
+	}
+
+	public function canBeActivated() : bool {
 		return true;
 	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
-		if(($target->isTransparent() === false or $target->getId() === self::SLAB) and $face !== 0 and $face !== 1) {
-			$faces = [2 => 0, 3 => 1, 4 => 2, 5 => 3,];
-			$this->meta = $faces[$face] & 0x03;
-			if($fy > 0.5) {
-				$this->meta |= 0x08;
-			}
-			$this->getLevel()->setBlock($block, $this, true, true);
-
-			return true;
+		$directions = [0 => 1, 1 => 3, 2 => 0, 3 => 2];
+		if($player !== null) {
+			$this->meta = $directions[$player->getDirection() & 0x03];
 		}
+		if(($fy > 0.5 and $face !== self::SIDE_UP) or $face === self::SIDE_DOWN) {
+			$this->meta |= 0b00000100; //top half of block
+		}
+		$this->getLevel()->setBlock($block, $this, true, true);
 
-		return false;
+		return true;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[$this->id, 0, 1],];
 	}
 
-	public function onActivate(Item $item, Player $player = null) {
-		$this->meta ^= 0x04;
+	public function isOpened() {
+		return (($this->meta & 0b00001000) === 0);
+	}
+
+	public function onActivate(Item $item, Player $player = \null) {
+		$this->meta ^= 0b00001000;
 		$this->getLevel()->setBlock($this, $this, true);
 		$this->level->addSound(new DoorSound($this));
 

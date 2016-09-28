@@ -25,9 +25,9 @@ use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\tile\Chest as TileChest;
@@ -41,7 +41,7 @@ class Chest extends Transparent {
 		$this->meta = $meta;
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
@@ -49,7 +49,7 @@ class Chest extends Transparent {
 		return 2.5;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Chest";
 	}
 
@@ -80,7 +80,7 @@ class Chest extends Transparent {
 		}
 
 		$this->getLevel()->setBlock($block, $this, true, true);
-		$nbt = new Compound("", [new Enum("Items", []), new StringTag("id", Tile::CHEST), new IntTag("x", $this->x), new IntTag("y", $this->y), new IntTag("z", $this->z)]);
+		$nbt = new CompoundTag("", [new ListTag("Items", []), new StringTag("id", Tile::CHEST), new IntTag("x", $this->x), new IntTag("y", $this->y), new IntTag("z", $this->z)]);
 		$nbt->Items->setTagType(NBT::TAG_Compound);
 
 		if($item->hasCustomName()) {
@@ -125,19 +125,18 @@ class Chest extends Transparent {
 			if($t instanceof TileChest) {
 				$chest = $t;
 			} else {
-				$nbt = new Compound("", [new Enum("Items", []), new StringTag("id", Tile::CHEST), new IntTag("x", $this->x), new IntTag("y", $this->y), new IntTag("z", $this->z)]);
+				$nbt = new CompoundTag("", [new ListTag("Items", []), new StringTag("id", Tile::CHEST), new IntTag("x", $this->x), new IntTag("y", $this->y), new IntTag("z", $this->z)]);
 				$nbt->Items->setTagType(NBT::TAG_Compound);
 				$chest = Tile::createTile("Chest", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 			}
 
 			if(isset($chest->namedtag->Lock) and $chest->namedtag->Lock instanceof StringTag) {
-				$chestName = $chest->namedtag->Lock->getValue();
-				if(!empty($chestName) && $chestName !== $item->getCustomName()) {
+				if($chest->namedtag->Lock->getValue() !== $item->getCustomName()) {
 					return true;
 				}
 			}
 
-			if($player->isCreative()) {
+			if($player->isCreative() and $player->getServer()->limitedCreative) {
 				return true;
 			}
 			$player->addWindow($chest->getInventory());
@@ -146,7 +145,7 @@ class Chest extends Transparent {
 		return true;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[$this->id, 0, 1],];
 	}
 

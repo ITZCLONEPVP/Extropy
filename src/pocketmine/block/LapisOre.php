@@ -21,6 +21,7 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Dye;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
@@ -40,13 +41,13 @@ class LapisOre extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Lapis Lazuli Ore";
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 3) {
-			return [[Item::DYE, 4, mt_rand(4, 8)],];
+			return [[Item::DYE, Dye::BLUE, mt_rand(3, 8)],];
 		} else {
 			return [];
 		}

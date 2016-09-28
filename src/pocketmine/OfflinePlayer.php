@@ -23,7 +23,7 @@ namespace pocketmine;
 
 
 use pocketmine\metadata\MetadataValue;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\plugin\Plugin;
 
 class OfflinePlayer implements IPlayer {
@@ -64,7 +64,7 @@ class OfflinePlayer implements IPlayer {
 		return $this->server;
 	}
 
-	public function setOp($value) {
+	public function setOp(bool $value) {
 		if($value === $this->isOp()) {
 			return;
 		}
@@ -76,7 +76,7 @@ class OfflinePlayer implements IPlayer {
 		}
 	}
 
-	public function isOp() {
+	public function isOp() : bool {
 		return $this->server->isOp(strtolower($this->getName()));
 	}
 
@@ -105,15 +105,15 @@ class OfflinePlayer implements IPlayer {
 	}
 
 	public function getFirstPlayed() {
-		return $this->namedtag instanceof Compound ? $this->namedtag["firstPlayed"] : null;
+		return $this->namedtag instanceof CompoundTag ? $this->namedtag["firstPlayed"] : null;
 	}
 
 	public function getLastPlayed() {
-		return $this->namedtag instanceof Compound ? $this->namedtag["lastPlayed"] : null;
+		return $this->namedtag instanceof CompoundTag ? $this->namedtag["lastPlayed"] : null;
 	}
 
 	public function hasPlayedBefore() {
-		return $this->namedtag instanceof Compound;
+		return $this->namedtag instanceof CompoundTag;
 	}
 
 	public function setMetadata($metadataKey, MetadataValue $metadataValue) {

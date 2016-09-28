@@ -27,6 +27,13 @@ use pocketmine\math\Vector3;
 
 class Fence extends Transparent {
 
+	const FENCE_OAK = 0;
+	const FENCE_SPRUCE = 1;
+	const FENCE_BIRCH = 2;
+	const FENCE_JUNGLE = 3;
+	const FENCE_ACACIA = 4;
+	const FENCE_DARKOAK = 5;
+
 	protected $id = self::FENCE;
 
 	public function __construct($meta = 0) {
@@ -38,11 +45,18 @@ class Fence extends Transparent {
 	}
 
 	public function getToolType() {
-		return Tool::TYPE_PICKAXE;
+		return Tool::TYPE_AXE;
 	}
 
+	public function getBurnChance() : int {
+		return 5;
+	}
 
-	public function getName() {
+	public function getBurnAbility() : int {
+		return 20;
+	}
+
+	public function getName() : string {
 		static $names = [0 => "Oak Fence", 1 => "Spruce Fence", 2 => "Birch Fence", 3 => "Jungle Fence", 4 => "Acacia Fence", 5 => "Dark Oak Fence", "", ""];
 
 		return $names[$this->meta & 0x07];

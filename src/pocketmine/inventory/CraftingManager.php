@@ -41,14 +41,14 @@ class CraftingManager {
 	/** @var int */
 	private static $RECIPE_COUNT = 0;
 
-	/** @var CraftingDataPacket */
-	protected $recipeList = null;
-
 	/** @var Recipe[] */
 	public $recipes = [];
 
 	/** @var FurnaceRecipe[] */
 	public $furnaceRecipes = [];
+
+	/** @var CraftingDataPacket */
+	protected $recipeList = null;
 
 	/** @var Recipe[][] */
 	protected $recipeLookup = [];
@@ -128,32 +128,6 @@ class CraftingManager {
 		$this->setRecipeList();
 	}
 
-	protected function setRecipeList() {
-		if(!$this->recipeList instanceof CraftingDataPacket) {
-			$pk = new CraftingDataPacket();
-			$pk->cleanRecipes = true;
-
-			foreach($this->getRecipes() as $recipe) {
-				if($recipe instanceof ShapedRecipe) {
-					$pk->addShapedRecipe($recipe);
-				} elseif($recipe instanceof ShapelessRecipe) {
-					$pk->addShapelessRecipe($recipe);
-				}
-			}
-
-			foreach($this->getFurnaceRecipes() as $recipe) {
-				$pk->addFurnaceRecipe($recipe);
-			}
-			$pk->encode();
-			$pk->isEncoded = true;
-			$this->recipeList = $pk;
-		}
-	}
-
-	public function sendRecipeList(Player $player) {
-		$player->dataPacket($this->recipeList);
-	}
-
 	protected function registerStonecutter() {
 		$shapes = ["slab" => ["   ", "XXX", "   "], "stairs" => ["X  ", "XX ", "XXX"], "wall/fence" => ["XXX", "XXX", "   "], "blockrecipe1" => ["XX", "XX"], "blockrecipe2X1" => ["   ", " X ", " X "], "blockrecipe2X2" => ["AB", "BA"], "blockrecipe1X2" => ["  ", "AB"]];
 
@@ -167,7 +141,7 @@ class CraftingManager {
 		$RECIPE_SHAPE = 4;
 		$RESULT_AMOUNT = 5;
 		$recipes = [//RESULT_ITEM_ID            RESULT_META                 INGREDIENT_ITEMID           INGREDIENT_META     RECIPE_SHAPE        RESULT_AMOUNT
-			[Item::SLAB, Slab::STONE, Item::STONE, Stone::NORMAL, "slab", 6], [Item::SLAB, Slab::COBBLESTONE, Item::COBBLESTONE, 0, "slab", 6], [Item::SLAB, Slab::SANDSTONE, Item::SANDSTONE, 0, "slab", 6], [Item::SLAB, Slab::BRICK, Item::BRICK, 0, "slab", 6], [Item::SLAB, Slab::STONE_BRICK, Item::STONE_BRICK, StoneBricks::NORMAL, "slab", 6], [Item::SLAB, Slab::NETHER_BRICK, Item::NETHER_BRICK_BLOCK, 0, "slab", 6], [Item::SLAB, Slab::QUARTZ, Item::QUARTZ_BLOCK, 0, "slab", 6], [Item::COBBLESTONE_STAIRS, 0, Item::COBBLESTONE, 0, "stairs", 4], [Item::SANDSTONE_STAIRS, 0, Item::SANDSTONE, 0, "stairs", 4], [Item::STONE_BRICK_STAIRS, 0, Item::STONE_BRICK, StoneBricks::NORMAL, "stairs", 4], [Item::BRICK_STAIRS, 0, Item::BRICKS_BLOCK, 0, "stairs", 4], [Item::NETHER_BRICKS_STAIRS, 0, Item::NETHER_BRICK_BLOCK, 0, "stairs", 4], [Item::COBBLESTONE_WALL, StoneWall::NONE_MOSSY_WALL, Item::COBBLESTONE, 0, "wall/fence", 6], [Item::COBBLESTONE_WALL, StoneWall::MOSSY_WALL, Item::MOSSY_STONE, 0, "wall/fence", 6], [Item::NETHER_BRICK_FENCE, 0, Item::NETHER_BRICK_BLOCK, 0, "wall/fence", 6], [Item::NETHER_BRICKS, 0, Item::NETHER_BRICK, 0, "blockrecipe1", 1], [Item::SANDSTONE, Sandstone::NORMAL, Item::SAND, 0, "blockrecipe1", 1], [Item::SANDSTONE, Sandstone::CHISELED, Item::SANDSTONE, SandStone::NORMAL, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::NORMAL, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::POLISHED_GRANITE, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::POLISHED_DIORITE, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::POLISHED_ANDESITE, "blockrecipe1", 4], [Item::STONE, Stone::POLISHED_GRANITE, Item::STONE, Stone::GRANITE, "blockrecipe1", 4], [Item::STONE, Stone::POLISHED_DIORITE, Item::STONE, Stone::DIORITE, "blockrecipe1", 4], [Item::STONE, Stone::POLISHED_ANDESITE, Item::STONE, Stone::ANDESITE, "blockrecipe1", 4], [Item::QUARTZ_BLOCK, Quartz::QUARTZ_NORMAL, Item::QUARTZ, Stone::ANDESITE, "blockrecipe1", 4], [Item::QUARTZ_BLOCK, Quartz::QUARTZ_CHISELED, Item::SLAB, Slab::QUARTZ, "blockrecipe2X1", 1], [Item::SANDSTONE, SandStone::CHISELED, Item::SLAB, Slab::SANDSTONE, "blockrecipe2X1", 1], [Item::STONE_BRICK, StoneBricks::CHISELED, Item::SLAB, Slab::STONE_BRICK, "blockrecipe2X1", 1],];
+			[Item::SLAB, Slab::STONE, Item::STONE, Stone::NORMAL, "slab", 6], [Item::SLAB, Slab::COBBLESTONE, Item::COBBLESTONE, 0, "slab", 6], [Item::SLAB, Slab::SANDSTONE, Item::SANDSTONE, 0, "slab", 6], [Item::SLAB, Slab::BRICK, Item::BRICK, 0, "slab", 6], [Item::SLAB, Slab::STONE_BRICK, Item::STONE_BRICK, StoneBricks::NORMAL, "slab", 6], [Item::SLAB, Slab::NETHER_BRICK, Item::NETHER_BRICK_BLOCK, 0, "slab", 6], [Item::SLAB, Slab::QUARTZ, Item::QUARTZ_BLOCK, 0, "slab", 6], [Item::COBBLESTONE_STAIRS, 0, Item::COBBLESTONE, 0, "stairs", 4], [Item::SANDSTONE_STAIRS, 0, Item::SANDSTONE, 0, "stairs", 4], [Item::STONE_BRICK_STAIRS, 0, Item::STONE_BRICK, StoneBricks::NORMAL, "stairs", 4], [Item::BRICK_STAIRS, 0, Item::BRICKS_BLOCK, 0, "stairs", 4], [Item::NETHER_BRICKS_STAIRS, 0, Item::NETHER_BRICK_BLOCK, 0, "stairs", 4], [Item::COBBLESTONE_WALL, StoneWall::NONE_MOSSY_WALL, Item::COBBLESTONE, 0, "wall/fence", 6], [Item::COBBLESTONE_WALL, StoneWall::MOSSY_WALL, Item::MOSSY_STONE, 0, "wall/fence", 6], [Item::NETHER_BRICK_FENCE, 0, Item::NETHER_BRICK_BLOCK, 0, "wall/fence", 6], [Item::NETHER_BRICKS, 0, Item::NETHER_BRICK, 0, "blockrecipe1", 1], [Item::SANDSTONE, Sandstone::NORMAL, Item::SAND, 0, "blockrecipe1", 1], [Item::SANDSTONE, Sandstone::CHISELED, Item::SANDSTONE, Sandstone::NORMAL, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::NORMAL, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::POLISHED_GRANITE, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::POLISHED_DIORITE, "blockrecipe1", 4], [Item::STONE_BRICK, StoneBricks::NORMAL, Item::STONE, Stone::POLISHED_ANDESITE, "blockrecipe1", 4], [Item::STONE, Stone::POLISHED_GRANITE, Item::STONE, Stone::GRANITE, "blockrecipe1", 4], [Item::STONE, Stone::POLISHED_DIORITE, Item::STONE, Stone::DIORITE, "blockrecipe1", 4], [Item::STONE, Stone::POLISHED_ANDESITE, Item::STONE, Stone::ANDESITE, "blockrecipe1", 4], [Item::QUARTZ_BLOCK, Quartz::QUARTZ_NORMAL, Item::QUARTZ, Stone::ANDESITE, "blockrecipe1", 4], [Item::QUARTZ_BLOCK, Quartz::QUARTZ_CHISELED, Item::SLAB, Slab::QUARTZ, "blockrecipe2X1", 1], [Item::SANDSTONE, Sandstone::CHISELED, Item::SLAB, Slab::SANDSTONE, "blockrecipe2X1", 1], [Item::STONE_BRICK, StoneBricks::CHISELED, Item::SLAB, Slab::STONE_BRICK, "blockrecipe2X1", 1],];
 		foreach($recipes as $recipe) {
 			$buildRecipes[] = $this->createOneIngredientRecipe($shapes[$recipe[$RECIPE_SHAPE]], $recipe[$RESULT_ITEM_ID], $recipe[$RESULT_META], $recipe[$RESULT_AMOUNT], $recipe[$INGREDIENT_ITEM_ID], $recipe[$INGREDIENT_META], "X", "Stonecutter");
 		}
@@ -238,7 +212,7 @@ class CraftingManager {
 	}
 
 	public function registerRecipe(Recipe $recipe) {
-		$recipe->setId(UUID::fromData(++self::$RECIPE_COUNT, $recipe->getResult()->getId(), $recipe->getResult()->getDamage(), $recipe->getResult()->getCount(), $recipe->getResult()->getCompound()));
+		$recipe->setId(UUID::fromData(++self::$RECIPE_COUNT, $recipe->getResult()->getId(), $recipe->getResult()->getDamage(), $recipe->getResult()->getCount(), $recipe->getResult()->getCompoundTag()));
 
 		if($recipe instanceof ShapedRecipe) {
 			$this->registerShapedRecipe($recipe);
@@ -421,15 +395,26 @@ class CraftingManager {
 		$this->registerRecipe((new BigShapelessRecipe(Item::get(Item::CAKE, 0, 1)))->addIngredient(Item::get(Item::WHEAT, 0, 3))->addIngredient(Item::get(Item::BUCKET, 1, 3))->addIngredient(Item::get(Item::EGG, 0, 1))->addIngredient(Item::get(Item::SUGAR, 0, 2)));
 	}
 
-	/**
-	 * @param UUID $id
-	 *
-	 * @return Recipe
-	 */
-	public function getRecipe(UUID $id) {
-		$index = $id->toBinary();
+	protected function setRecipeList() {
+		if(!$this->recipeList instanceof CraftingDataPacket) {
+			$pk = new CraftingDataPacket();
+			$pk->cleanRecipes = true;
 
-		return isset($this->recipes[$index]) ? $this->recipes[$index] : null;
+			foreach($this->getRecipes() as $recipe) {
+				if($recipe instanceof ShapedRecipe) {
+					$pk->addShapedRecipe($recipe);
+				} elseif($recipe instanceof ShapelessRecipe) {
+					$pk->addShapelessRecipe($recipe);
+				}
+			}
+
+			foreach($this->getFurnaceRecipes() as $recipe) {
+				$pk->addFurnaceRecipe($recipe);
+			}
+			$pk->encode();
+			$pk->isEncoded = true;
+			$this->recipeList = $pk;
+		}
 	}
 
 	/**
@@ -444,6 +429,21 @@ class CraftingManager {
 	 */
 	public function getFurnaceRecipes() {
 		return $this->furnaceRecipes;
+	}
+
+	public function sendRecipeList(Player $player) {
+		$player->dataPacket($this->recipeList);
+	}
+
+	/**
+	 * @param UUID $id
+	 *
+	 * @return Recipe
+	 */
+	public function getRecipe(UUID $id) {
+		$index = $id->toBinary();
+
+		return isset($this->recipes[$index]) ? $this->recipes[$index] : null;
 	}
 
 	/**
@@ -492,7 +492,7 @@ class CraftingManager {
 				foreach($ingredients as $item) {
 					$amount = $item->getCount();
 					foreach($checkInput as $k => $checkItem) {
-						if($checkItem->equals($item, $checkItem->getDamage() === null ? false : true, $checkItem->getCompound() === null ? false : true)) {
+						if($checkItem->equals($item, $checkItem->getDamage() === null ? false : true, $checkItem->getCompoundTag() === null ? false : true)) {
 							$remove = min($checkItem->getCount(), $amount);
 							$checkItem->setCount($checkItem->getCount() - $remove);
 							if($checkItem->getCount() === 0) {

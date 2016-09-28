@@ -32,4 +32,8 @@ class DiamondAxe extends Tool {
 		return Tool::TIER_DIAMOND;
 	}
 
+	public function getAttackDamage() {
+		return 7;
+	}
+
 }

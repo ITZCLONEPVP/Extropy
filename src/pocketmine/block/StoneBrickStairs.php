@@ -40,7 +40,7 @@ class StoneBrickStairs extends Stair {
 		return 1.5;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Stone Brick Stairs";
 	}
 

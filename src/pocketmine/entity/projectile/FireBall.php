@@ -27,7 +27,7 @@ use pocketmine\event\entity\ExplosionPrimeEvent;
 use pocketmine\level\Explosion;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\particle\CriticalParticle;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
 
@@ -49,7 +49,7 @@ class FireBall extends Projectile {
 
 	protected $canExplode = false;
 
-	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null, bool $critical = false) {
+	public function __construct(FullChunk $chunk, CompoundTag $nbt, Entity $shootingEntity = null, bool $critical = false) {
 		parent::__construct($chunk, $nbt, $shootingEntity);
 
 		$this->isCritical = $critical;

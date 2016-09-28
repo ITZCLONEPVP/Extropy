@@ -21,6 +21,7 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\enchantment\enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
@@ -40,13 +41,21 @@ class CoalOre extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Coal Ore";
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
-			return [[Item::COAL, 0, 1],];
+			if($item->getEnchantmentLevel(Enchantment::TYPE_MINING_SILK_TOUCH) > 0) {
+				return [[Item::COAL_ORE, 0, 1],];
+			} else {
+				$times = [1, 1, 2, 3, 4];
+				$time = $times[mt_rand(0, 1)];
+
+				return [[Item::COAL, 0, $time],];
+			}
+
 		} else {
 			return [];
 		}

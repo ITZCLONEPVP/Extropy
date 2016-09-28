@@ -32,7 +32,7 @@ class MossStone extends Solid {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Moss Stone";
 	}
 
@@ -44,7 +44,7 @@ class MossStone extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[Item::MOSS_STONE, $this->meta, 1],];
 		} else {

@@ -32,7 +32,7 @@ class HardenedClay extends Solid {
 
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Hardened Clay";
 	}
 

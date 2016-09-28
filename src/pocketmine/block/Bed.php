@@ -22,15 +22,12 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
 class Bed extends Transparent {
-
-	const NIGHT_START = 16000;
-	const NIGHT_END = 29000;
-	const FULL_DAY = 30000;
 
 	protected $id = self::BED_BLOCK;
 
@@ -38,7 +35,7 @@ class Bed extends Transparent {
 		$this->meta = $meta;
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
@@ -46,17 +43,15 @@ class Bed extends Transparent {
 		return 0.2;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Bed Block";
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
+		$time = $this->getLevel()->getTime() % Level::TIME_FULL;
 
-		return false;
+		$isNight = ($time >= Level::TIME_NIGHT and $time < Level::TIME_SUNRISE);
 
-		$time = $this->getLevel()->getTime() % self::FULL_DAY;
-
-		$isNight = ($time >= self::NIGHT_START and $time < self::NIGHT_END);
 		if($player instanceof Player and !$isNight) {
 			$player->sendMessage(TextFormat::GRAY . "You can only sleep at night");
 
@@ -114,30 +109,17 @@ class Bed extends Transparent {
 	}
 
 	public function onBreak(Item $item) {
-		$blockNorth = $this->getSide(2); //Gets the blocks around them
-		$blockSouth = $this->getSide(3);
-		$blockEast = $this->getSide(5);
-		$blockWest = $this->getSide(4);
+		$sides = [0 => 3, 1 => 4, 2 => 2, 3 => 5, 8 => 2, 9 => 5, 10 => 3, 11 => 4,];
 
 		if(($this->meta & 0x08) === 0x08) { //This is the Top part of bed
-			if($blockNorth->getId() === $this->id and $blockNorth->meta !== 0x08) { //Checks if the block ID and meta are right
-				$this->getLevel()->setBlock($blockNorth, new Air(), true, true);
-			} elseif($blockSouth->getId() === $this->id and $blockSouth->meta !== 0x08) {
-				$this->getLevel()->setBlock($blockSouth, new Air(), true, true);
-			} elseif($blockEast->getId() === $this->id and $blockEast->meta !== 0x08) {
-				$this->getLevel()->setBlock($blockEast, new Air(), true, true);
-			} elseif($blockWest->getId() === $this->id and $blockWest->meta !== 0x08) {
-				$this->getLevel()->setBlock($blockWest, new Air(), true, true);
+			$next = $this->getSide($sides[$this->meta]);
+			if($next->getId() === $this->id and ($next->meta | 0x08) === $this->meta) { //Checks if the block ID and meta are right
+				$this->getLevel()->setBlock($next, new Air(), true, true);
 			}
 		} else { //Bottom Part of Bed
-			if($blockNorth->getId() === $this->id and ($blockNorth->meta & 0x08) === 0x08) {
-				$this->getLevel()->setBlock($blockNorth, new Air(), true, true);
-			} elseif($blockSouth->getId() === $this->id and ($blockSouth->meta & 0x08) === 0x08) {
-				$this->getLevel()->setBlock($blockSouth, new Air(), true, true);
-			} elseif($blockEast->getId() === $this->id and ($blockEast->meta & 0x08) === 0x08) {
-				$this->getLevel()->setBlock($blockEast, new Air(), true, true);
-			} elseif($blockWest->getId() === $this->id and ($blockWest->meta & 0x08) === 0x08) {
-				$this->getLevel()->setBlock($blockWest, new Air(), true, true);
+			$next = $this->getSide($sides[$this->meta]);
+			if($next->getId() === $this->id and $next->meta === ($this->meta | 0x08)) {
+				$this->getLevel()->setBlock($next, new Air(), true, true);
 			}
 		}
 		$this->getLevel()->setBlock($this, new Air(), true, true);
@@ -145,7 +127,7 @@ class Bed extends Transparent {
 		return true;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[Item::BED, 0, 1],];
 	}
 

@@ -38,7 +38,7 @@ class WoodSlab extends Transparent {
 		return 2;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		static $names = [0 => "Oak", 1 => "Spruce", 2 => "Birch", 3 => "Jungle", 4 => "Acacia", 5 => "Dark Oak", 6 => "", 7 => ""];
 
 		return (($this->meta & 0x08) === 0x08 ? "Upper " : "") . $names[$this->meta & 0x07] . " Wooden Slab";
@@ -96,7 +96,7 @@ class WoodSlab extends Transparent {
 		return Tool::TYPE_AXE;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[$this->id, $this->meta & 0x07, 1],];
 	}
 

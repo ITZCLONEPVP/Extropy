@@ -21,9 +21,12 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\enchantment\enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\level\generator\object\TallGrass as TallGrassObject;
 use pocketmine\Player;
+use pocketmine\utils\Random;
 
 class Grass extends Solid {
 
@@ -33,11 +36,11 @@ class Grass extends Solid {
 
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Grass";
 	}
 
@@ -49,14 +52,32 @@ class Grass extends Solid {
 		return Tool::TYPE_SHOVEL;
 	}
 
-	public function getDrops(Item $item) {
-		return [[Item::DIRT, 0, 1],];
-	}
-
-	public function onUpdate($type) {
+	public function getDrops(Item $item) : array {
+		if($item->getEnchantmentLevel(Enchantment::TYPE_MINING_SILK_TOUCH) > 0) {
+			return [[Item::GRASS, 0, 1],];
+		} else {
+			return [[Item::DIRT, 0, 1],];
+		}
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
+		if($item->getId() === Item::DYE and $item->getDamage() === 0x0F) {
+			$item->count--;
+			TallGrassObject::growGrass($this->getLevel(), $this, new Random(mt_rand()), 8, 2);
+
+			return true;
+		} elseif($item->isHoe()) {
+			$item->useOn($this);
+			$this->getLevel()->setBlock($this, new Farmland());
+
+			return true;
+		} elseif($item->isShovel() and $this->getSide(1)->getId() === Block::AIR) {
+			$item->useOn($this);
+			$this->getLevel()->setBlock($this, new GrassPath());
+
+			return true;
+		}
+
 		return false;
 	}
 }

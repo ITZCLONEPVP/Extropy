@@ -21,12 +21,11 @@
 
 namespace pocketmine\block;
 
+use pocketmine\entity\Effect;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
-
 
 class Cake extends Transparent {
 
@@ -36,7 +35,7 @@ class Cake extends Transparent {
 		$this->meta = $meta;
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
@@ -44,7 +43,7 @@ class Cake extends Transparent {
 		return 0.5;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Cake Block";
 	}
 
@@ -59,29 +58,15 @@ class Cake extends Transparent {
 		return false;
 	}
 
-	public function onUpdate($type) {
-		if($type === Level::BLOCK_UPDATE_NORMAL) {
-			if($this->getSide(0)->getId() === self::AIR) { //Replace with common break method
-				$this->getLevel()->setBlock($this, new Air(), true);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-
-		return false;
-	}
-
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [];
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
 		if($player instanceof Player and $player->getHealth() < $player->getMaxHealth()) {
 			++$this->meta;
-
-			$ev = new EntityRegainHealthEvent($player, 3, EntityRegainHealthEvent::CAUSE_EATING);
+			$ev = new EntityRegainHealthEvent($player, $this->getFoodRestoration(), EntityRegainHealthEvent::CAUSE_EATING);
 			$player->heal($ev->getAmount(), $ev);
-
 			if($this->meta >= 0x06) {
 				$this->getLevel()->setBlock($this, new Air(), true);
 			} else {
@@ -94,11 +79,21 @@ class Cake extends Transparent {
 		return false;
 	}
 
+	public function getFoodRestoration() : int {
+		return 2;
+	}
+
+	/**
+	 * @return Effect[]
+	 */
+	public function getAdditionalEffects() : array {
+		return [];
+	}
+
 	protected function recalculateBoundingBox() {
 
 		$f = (1 + $this->getDamage() * 2) / 16;
 
 		return new AxisAlignedBB($this->x + $f, $this->y, $this->z + 0.0625, $this->x + 1 - 0.0625, $this->y + 0.5, $this->z + 1 - 0.0625);
 	}
-
 }

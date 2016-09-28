@@ -47,10 +47,28 @@ class Slab extends Transparent {
 		return 2;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		static $names = [0 => "Stone", 1 => "Sandstone", 2 => "Wooden", 3 => "Cobblestone", 4 => "Brick", 5 => "Stone Brick", 6 => "Quartz", 7 => "",];
 
 		return (($this->meta & 0x08) > 0 ? "Upper " : "") . $names[$this->meta & 0x07] . " Slab";
+	}
+
+	public function getBurnChance() : int {
+		$type = $this->meta & 0x07;
+		if($type == self::WOODEN) {
+			return 5;
+		}
+
+		return 0;
+	}
+
+	public function getBurnAbility() : int {
+		$type = $this->meta & 0x07;
+		if($type == self::WOODEN) {
+			return 5;
+		}
+
+		return 0;
 	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
@@ -102,7 +120,7 @@ class Slab extends Transparent {
 		return true;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[$this->id, $this->meta & 0x07, 1],];
 		} else {

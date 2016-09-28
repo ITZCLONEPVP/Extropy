@@ -45,13 +45,13 @@ class StoneBricks extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		static $names = [0 => "Stone Bricks", 1 => "Mossy Stone Bricks", 2 => "Cracked Stone Bricks", 3 => "Chiseled Stone Bricks",];
 
 		return $names[$this->meta & 0x03];
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[Item::STONE_BRICKS, $this->meta & 0x03, 1],];
 		} else {

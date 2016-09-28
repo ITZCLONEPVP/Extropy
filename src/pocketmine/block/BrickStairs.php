@@ -44,7 +44,7 @@ class BrickStairs extends Stair {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Brick Stairs";
 	}
 

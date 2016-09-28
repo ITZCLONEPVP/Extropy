@@ -24,12 +24,24 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Redstone extends Solid {
+class Redstone extends RedstoneSource {
 
 	protected $id = self::REDSTONE_BLOCK;
 
 	public function __construct() {
 
+	}
+
+	public function getBoundingBox() {
+		return Block::getBoundingBox();
+	}
+
+	public function canBeFlowedInto() {
+		return false;
+	}
+
+	public function isSolid() {
+		return true;
 	}
 
 	public function getHardness() {
@@ -40,11 +52,11 @@ class Redstone extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
-		return "Redstone Block";
+	public function getName() : string {
+		return "Block of Redstone";
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[Item::REDSTONE_BLOCK, 0, 1],];
 		} else {

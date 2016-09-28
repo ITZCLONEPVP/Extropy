@@ -37,7 +37,7 @@ class Cobweb extends Flowable {
 		return true;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Cobweb";
 	}
 
@@ -46,15 +46,18 @@ class Cobweb extends Flowable {
 	}
 
 	public function getToolType() {
-		return Tool::TYPE_SWORD;
+		return Tool::TYPE_SHEARS;
 	}
 
 	public function onEntityCollide(Entity $entity) {
 		$entity->resetFallDistance();
 	}
 
-	public function getDrops(Item $item) {
-		//TODO: correct drops
+	public function getDrops(Item $item) : array {
+		if($item->isShears()) {
+			return [[Item::COBWEB, 0, 1],];
+		}
+
 		return [];
 	}
 }

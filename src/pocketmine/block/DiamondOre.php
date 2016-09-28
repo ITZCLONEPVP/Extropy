@@ -36,7 +36,7 @@ class DiamondOre extends Solid {
 		return 3;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Diamond Ore";
 	}
 
@@ -44,9 +44,10 @@ class DiamondOre extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 4) {
 			return [[Item::DIAMOND, 0, 1],];
+
 		} else {
 			return [];
 		}

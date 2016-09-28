@@ -23,7 +23,6 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
-use pocketmine\level\Level;
 use pocketmine\Player;
 
 class SnowLayer extends Flowable {
@@ -34,7 +33,7 @@ class SnowLayer extends Flowable {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Snow Layer";
 	}
 
@@ -62,19 +61,7 @@ class SnowLayer extends Flowable {
 		return false;
 	}
 
-	public function onUpdate($type) {
-		if($type === Level::BLOCK_UPDATE_NORMAL) {
-			if($this->getSide(0)->getId() === self::AIR) { //Replace with common break method
-				$this->getLevel()->setBlock($this, new Air(), true);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-
-		return false;
-	}
-
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isShovel() !== false) {
 			return [[Item::SNOWBALL, 0, 1],];
 		}

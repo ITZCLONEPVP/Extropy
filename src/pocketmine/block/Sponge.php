@@ -34,7 +34,7 @@ class Sponge extends Solid {
 		return 0.6;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Sponge";
 	}
 

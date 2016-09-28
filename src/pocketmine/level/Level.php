@@ -85,11 +85,11 @@ use pocketmine\metadata\BlockMetadataStore;
 use pocketmine\metadata\Metadatable;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\protocol\FullChunkDataPacket;
@@ -1269,7 +1269,7 @@ class Level implements ChunkManager, Metadatable {
 			return;
 		}
 		$this->updateQueueIndex[$index] = $delay;
-		$this->updateQueue->insert(new Vector3((int)$pos->x, (int)$pos->y, (int)$pos->z), (int)$delay + $this->server->getTick());
+		$this->updateQueue->insert($this->temporalVector->setComponents((int)$pos->x, (int)$pos->y, (int)$pos->z), (int)$delay + $this->server->getTick());
 	}
 
 	/**
@@ -1329,19 +1329,18 @@ class Level implements ChunkManager, Metadatable {
 		$minX = Math::floorFloat($bb->minX);
 		$minY = Math::floorFloat($bb->minY);
 		$minZ = Math::floorFloat($bb->minZ);
-		$maxX = Math::floorFloat($bb->maxX + 1);
-		$maxY = Math::floorFloat($bb->maxY + 1);
-		$maxZ = Math::floorFloat($bb->maxZ + 1);
+		$maxX = Math::ceilFloat($bb->maxX);
+		$maxY = Math::ceilFloat($bb->maxY);
+		$maxZ = Math::ceilFloat($bb->maxZ);
 
 		$collides = [];
-		$v = $this->temporalVector;
 
-		for($v->z = $minZ; $v->z < $maxZ; ++$v->z) {
-			for($v->x = $minX; $v->x < $maxX; ++$v->x) {
-				for($v->y = $minY - 1; $v->y < $maxY; ++$v->y) {
-					$block = $this->getBlock($v);
-					if($block->getId() !== 0) {
-						$block->collidesWithBB($bb, $collides);
+		for($z = $minZ; $z <= $maxZ; ++$z) {
+			for($x = $minX; $x <= $maxX; ++$x) {
+				for($y = $minY; $y <= $maxY; ++$y) {
+					$block = $this->getBlock($this->temporalVector->setComponents($x, $y, $z));
+					if(!$block->canPassThrough() and $block->collidesWithBB($bb)) {
+						$collides[] = $block->getBoundingBox();
 					}
 				}
 			}
@@ -1462,7 +1461,7 @@ class Level implements ChunkManager, Metadatable {
 		$level = $target->getLevel();
 
 		if($level instanceof Level) {
-			$above = $level->getBlock(new Vector3($target->x, $target->y + 1, $target->z));
+			$above = $level->getBlock($this->temporalVector->setComponents($target->x, $target->y + 1, $target->z));
 			if($above instanceof Block) {
 				if($above->getId() === Item::FIRE) {
 					$level->setBlock($above, new Air(), true);
@@ -1636,10 +1635,10 @@ class Level implements ChunkManager, Metadatable {
 
 			if($newLevel < $oldLevel) {
 				$removalVisited[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((($y) & 0x7f) << 28) | (($z) & 0xFFFFFFF) : ($x) . ":" . ($y) . ":" . ($z)] = true;
-				$lightRemovalQueue->enqueue([new Vector3($x, $y, $z), $oldLevel]);
+				$lightRemovalQueue->enqueue([$this->temporalVector->setComponents($x, $y, $z), $oldLevel]);
 			} else {
 				$visited[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((($y) & 0x7f) << 28) | (($z) & 0xFFFFFFF) : ($x) . ":" . ($y) . ":" . ($z)] = true;
-				$lightPropagationQueue->enqueue(new Vector3($x, $y, $z));
+				$lightPropagationQueue->enqueue($this->temporalVector->setComponents($x, $y, $z));
 			}
 		}
 
@@ -1683,13 +1682,13 @@ class Level implements ChunkManager, Metadatable {
 			if(!isset($visited[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((($y) & 0x7f) << 28) | (($z) & 0xFFFFFFF) : ($x) . ":" . ($y) . ":" . ($z)])) {
 				$visited[$index] = true;
 				if($current > 1) {
-					$queue->enqueue([new Vector3($x, $y, $z), $current]);
+					$queue->enqueue([$this->temporalVector->setComponents($x, $y, $z), $current]);
 				}
 			}
 		} elseif($current >= $currentLight) {
 			if(!isset($spreadVisited[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((($y) & 0x7f) << 28) | (($z) & 0xFFFFFFF) : ($x) . ":" . ($y) . ":" . ($z)])) {
 				$spreadVisited[$index] = true;
-				$spreadQueue->enqueue(new Vector3($x, $y, $z));
+				$spreadQueue->enqueue($this->temporalVector->setComponents($x, $y, $z));
 			}
 		}
 	}
@@ -1703,7 +1702,7 @@ class Level implements ChunkManager, Metadatable {
 			if(!isset($visited[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((($y) & 0x7f) << 28) | (($z) & 0xFFFFFFF) : ($x) . ":" . ($y) . ":" . ($z)])) {
 				$visited[$index] = true;
 				if($currentLight > 1) {
-					$queue->enqueue(new Vector3($x, $y, $z));
+					$queue->enqueue($this->temporalVector->setComponents($x, $y, $z));
 				}
 			}
 		}
@@ -1797,15 +1796,15 @@ class Level implements ChunkManager, Metadatable {
 	 * @param int $delay
 	 */
 	public function dropItem(Vector3 $source, Item $item, Vector3 $motion = null, $delay = 10) {
-		$motion = $motion === null ? new Vector3(lcg_value() * 0.2 - 0.1, 0.2, lcg_value() * 0.2 - 0.1) : $motion;
+		$motion = $motion === null ? $this->temporalVector->setComponents(lcg_value() * 0.2 - 0.1, 0.2, lcg_value() * 0.2 - 0.1) : $motion;
 		if($item->getId() > 0 and $item->getCount() > 0) {
 			$chunk = $this->getChunk($source->getX() >> 4, $source->getZ() >> 4);
 			if(is_null($chunk)) {
 				return;
 			}
-			$itemEntity = Entity::createEntity("Item", $chunk, new Compound("", ["Pos" => new Enum("Pos", [new DoubleTag("", $source->getX()), new DoubleTag("", $source->getY()), new DoubleTag("", $source->getZ())]),
+			$itemEntity = Entity::createEntity("Item", $chunk, new CompoundTag("", ["Pos" => new ListTag("Pos", [new DoubleTag("", $source->getX()), new DoubleTag("", $source->getY()), new DoubleTag("", $source->getZ())]),
 
-				"Motion" => new Enum("Motion", [new DoubleTag("", $motion->x), new DoubleTag("", $motion->y), new DoubleTag("", $motion->z)]), "Rotation" => new Enum("Rotation", [new FloatTag("", lcg_value() * 360), new FloatTag("", 0)]), "Health" => new ShortTag("Health", 5), "Item" => NBT::putItemHelper($item), "PickupDelay" => new ShortTag("PickupDelay", $delay)]));
+				"Motion" => new ListTag("Motion", [new DoubleTag("", $motion->x), new DoubleTag("", $motion->y), new DoubleTag("", $motion->z)]), "Rotation" => new ListTag("Rotation", [new FloatTag("", lcg_value() * 360), new FloatTag("", 0)]), "Health" => new ShortTag("Health", 5), "Item" => NBT::putItemHelper($item), "PickupDelay" => new ShortTag("PickupDelay", $delay)]));
 
 			$itemEntity->spawnToAll();
 		}
@@ -1935,7 +1934,7 @@ class Level implements ChunkManager, Metadatable {
 		}
 
 		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN) {
-			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, ["id" => new StringTag("id", Tile::SIGN), "x" => new IntTag("x", $block->x), "y" => new IntTag("y", $block->y), "z" => new IntTag("z", $block->z), "Text1" => new StringTag("Text1", ""), "Text2" => new StringTag("Text2", ""), "Text3" => new StringTag("Text3", ""), "Text4" => new StringTag("Text4", "")]));
+			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new CompoundTag(false, ["id" => new StringTag("id", Tile::SIGN), "x" => new IntTag("x", $block->x), "y" => new IntTag("y", $block->y), "z" => new IntTag("z", $block->z), "Text1" => new StringTag("Text1", ""), "Text2" => new StringTag("Text2", ""), "Text3" => new StringTag("Text3", ""), "Text4" => new StringTag("Text4", "")]));
 			if($player instanceof Player) {
 				$tile->namedtag->Creator = new StringTag("Creator", $player->getName());
 			}

@@ -40,13 +40,13 @@ class DoubleSlab extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
-		static $names = [0 => "Stone", 1 => "Sandstone", 2 => "Wooden", 3 => "Cobblestone", 4 => "Brick", 5 => "Stone Brick", 6 => "Quartz", 7 => "",];
+	public function getName() : string {
+		static $names = [0 => "Stone", 1 => "Sandstone", 2 => "Wooden", 3 => "Cobblestone", 4 => "Brick", 5 => "Stone Brick", 6 => "Quartz", 7 => "Nether Brick",];
 
 		return "Double " . $names[$this->meta & 0x07] . " Slab";
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[Item::SLAB, $this->meta & 0x07, 2],];
 		} else {

@@ -23,6 +23,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\Player;
 
 class IronDoor extends Door {
 
@@ -32,7 +33,7 @@ class IronDoor extends Door {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Iron Door Block";
 	}
 
@@ -44,11 +45,15 @@ class IronDoor extends Door {
 		return 5;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[Item::IRON_DOOR, 0, 1],];
 		} else {
 			return [];
 		}
+	}
+
+	public function onActivate(Item $item, Player $player = null) {
+		if($player instanceof Player) return true; else return parent::onActivate($item, $player);
 	}
 }

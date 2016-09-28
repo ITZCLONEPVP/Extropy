@@ -32,7 +32,7 @@ class NetherBrickStairs extends Stair {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Nether Bricks Stairs";
 	}
 

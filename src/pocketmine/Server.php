@@ -41,6 +41,7 @@ use pocketmine\entity\animal\walking\Sheep;
 use pocketmine\entity\Arrow;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
+use pocketmine\entity\Egg;
 use pocketmine\entity\Entity;
 use pocketmine\entity\FallingSand;
 use pocketmine\entity\Human;
@@ -63,6 +64,7 @@ use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\projectile\FireBall;
 use pocketmine\entity\Snowball;
 use pocketmine\entity\Squid;
+use pocketmine\entity\ThrownPotion;
 use pocketmine\entity\Villager;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
@@ -85,11 +87,11 @@ use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
@@ -323,7 +325,7 @@ class Server {
 			@file_put_contents($this->dataPath . "pocketmine.yml", $content);
 		}
 		$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
-		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, ["motd" => "Minecraft: PE Server", "server-port" => 19132, "memory-limit" => "256M", "white-list" => false, "announce-player-achievements" => true, "spawn-protection" => 16, "max-players" => 20, "allow-flight" => false, "spawn-animals" => true, "animals-limit" => 0, "spawn-mobs" => true, "mobs-limit" => 0, "gamemode" => 0, "force-gamemode" => false, "hardcore" => false, "pvp" => true, "difficulty" => 1, "generator-settings" => "", "level-name" => "world", "level-seed" => "", "level-type" => "DEFAULT", "enable-query" => true, "enable-rcon" => false, "rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10), "auto-save" => true, "auto-generate" => false]);
+		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, ["motd" => "Minecraft: PE Server", "server-port" => 19132, "memory-limit" => "256M", "white-list" => false, "spawn-protection" => 16, "max-players" => 20, "allow-flight" => false, "spawn-animals" => true, "animals-limit" => 0, "spawn-mobs" => true, "mobs-limit" => 0, "gamemode" => 0, "force-gamemode" => false, "hardcore" => false, "pvp" => true, "difficulty" => 1, "generator-settings" => "", "level-name" => "world", "level-seed" => "", "level-type" => "DEFAULT", "enable-query" => true, "enable-rcon" => false, "rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10), "auto-save" => true, "auto-generate" => false]);
 
 		ServerScheduler::$WORKERS = $this->getProperty("settings.async-workers", 8);
 
@@ -412,6 +414,7 @@ class Server {
 		Block::init();
 		Item::init();
 		Biome::init();
+		Attribute::init();
 		TextWrapper::init();
 		$this->craftingManager = new CraftingManager();
 
@@ -509,6 +512,18 @@ class Server {
 	 */
 	public function getVersion() {
 		return \pocketmine\MINECRAFT_VERSION;
+	}
+
+	/**
+	 * @param string $variable
+	 * @param mixed $defaultValue
+	 *
+	 * @return mixed
+	 */
+	public function getProperty($variable, $defaultValue = null) {
+		$value = $this->config->getNested($variable);
+
+		return $value === null ? $defaultValue : $value;
 	}
 
 	/**
@@ -614,18 +629,6 @@ class Server {
 	}
 
 	/**
-	 * @param string $variable
-	 * @param mixed $defaultValue
-	 *
-	 * @return mixed
-	 */
-	public function getProperty($variable, $defaultValue = null) {
-		$value = $this->config->getNested($variable);
-
-		return $value === null ? $defaultValue : $value;
-	}
-
-	/**
 	 * @deprecated
 	 *
 	 * @param SourceInterface $interface
@@ -654,6 +657,8 @@ class Server {
 		Entity::registerEntity(FallingSand::class);
 		Entity::registerEntity(PrimedTNT::class);
 		Entity::registerEntity(Snowball::class);
+		Entity::registerEntity(Egg::class);
+		Entity::registerEntity(ThrownPotion::class);
 		Entity::registerEntity(Villager::class);
 		Entity::registerEntity(Squid::class);
 		Entity::registerEntity(Human::class, true);
@@ -1663,7 +1668,7 @@ class Server {
 	/**
 	 * @param string $name
 	 *
-	 * @return Compound
+	 * @return CompoundTag
 	 */
 	public function getOfflinePlayerData($name) {
 		$name = strtolower($name);
@@ -1682,12 +1687,12 @@ class Server {
 		//			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
 		//		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
-		$nbt = new Compound("", [new LongTag("firstPlayed", floor(microtime(true) * 1000)), new LongTag("lastPlayed", floor(microtime(true) * 1000)), new Enum("Pos", [new DoubleTag(0, $spawn->x), new DoubleTag(1, $spawn->y), new DoubleTag(2, $spawn->z)]), new StringTag("Level", $this->getDefaultLevel()->getName()), //new StringTag("SpawnLevel", $this->getDefaultLevel()->getName()),
+		$nbt = new CompoundTag("", [new LongTag("firstPlayed", floor(microtime(true) * 1000)), new LongTag("lastPlayed", floor(microtime(true) * 1000)), new ListTag("Pos", [new DoubleTag(0, $spawn->x), new DoubleTag(1, $spawn->y), new DoubleTag(2, $spawn->z)]), new StringTag("Level", $this->getDefaultLevel()->getName()), //new StringTag("SpawnLevel", $this->getDefaultLevel()->getName()),
 			//new IntTag("SpawnX", (int) $spawn->x),
 			//new IntTag("SpawnY", (int) $spawn->y),
 			//new IntTag("SpawnZ", (int) $spawn->z),
 			//new ByteTag("SpawnForced", 1), //TODO
-			new Enum("Inventory", []), new Compound("Achievements", []), new IntTag("playerGameType", $this->getGamemode()), new Enum("Motion", [new DoubleTag(0, 0.0), new DoubleTag(1, 0.0), new DoubleTag(2, 0.0)]), new Enum("Rotation", [new FloatTag(0, 0.0), new FloatTag(1, 0.0)]), new FloatTag("FallDistance", 0.0), new ShortTag("Fire", 0), new ShortTag("Air", 300), new ByteTag("OnGround", 1), new ByteTag("Invulnerable", 0), new StringTag("NameTag", $name),]);
+			new ListTag("Inventory", []), new CompoundTag("Achievements", []), new IntTag("playerGameType", $this->getGamemode()), new ListTag("Motion", [new DoubleTag(0, 0.0), new DoubleTag(1, 0.0), new DoubleTag(2, 0.0)]), new ListTag("Rotation", [new FloatTag(0, 0.0), new FloatTag(1, 0.0)]), new FloatTag("FallDistance", 0.0), new ShortTag("Fire", 0), new ShortTag("Air", 300), new ByteTag("OnGround", 1), new ByteTag("Invulnerable", 0), new StringTag("NameTag", $name),]);
 		$nbt->Pos->setTagType(NBT::TAG_Double);
 		$nbt->Inventory->setTagType(NBT::TAG_Compound);
 		$nbt->Motion->setTagType(NBT::TAG_Double);
@@ -1701,9 +1706,9 @@ class Server {
 
 	/**
 	 * @param string $name
-	 * @param Compound $nbtTag
+	 * @param CompoundTag $nbtTag
 	 */
-	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false) {
+	public function saveOfflinePlayerData($name, CompoundTag $nbtTag, $async = false) {
 		//			$nbt = new NBT(NBT::BIG_ENDIAN);
 		//		try{
 		//			$nbt->setData($nbtTag);

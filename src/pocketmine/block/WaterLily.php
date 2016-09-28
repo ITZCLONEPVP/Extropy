@@ -40,30 +40,21 @@ class WaterLily extends Flowable {
 		return false;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Lily Pad";
 	}
 
 	public function getHardness() {
-		return 0.6;
+		return 0;
+	}
+
+	public function getResistance() {
+		return 0;
 	}
 
 	public function canPassThrough() {
 		return true;
 	}
-
-	public function getBoundingBox() {
-		if($this->boundingBox === null) {
-			$this->boundingBox = $this->recalculateBoundingBox();
-		}
-
-		return $this->boundingBox;
-	}
-
-	protected function recalculateBoundingBox() {
-		return new AxisAlignedBB($this->x, $this->y, $this->z, $this->x + 1, $this->y + 1, $this->z + 1);
-	}
-
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
 		if($target instanceof Water) {
@@ -90,7 +81,11 @@ class WaterLily extends Flowable {
 		return false;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[$this->id, 0, 1]];
+	}
+
+	protected function recalculateBoundingBox() {
+		return new AxisAlignedBB($this->x, $this->y, $this->z, $this->x, $this->y + 0.0625, $this->z);
 	}
 }

@@ -22,7 +22,9 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\level\generator\object\Tree;
 use pocketmine\Player;
+use pocketmine\utils\Random;
 
 class Sapling extends Flowable {
 
@@ -39,11 +41,11 @@ class Sapling extends Flowable {
 		$this->meta = $meta;
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		static $names = [0 => "Oak Sapling", 1 => "Spruce Sapling", 2 => "Birch Sapling", 3 => "Jungle Sapling", 4 => "Acacia Sapling", 5 => "Dark Oak Sapling", 6 => "", 7 => "",];
 
 		return $names[$this->meta & 0x07];
@@ -52,7 +54,7 @@ class Sapling extends Flowable {
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
 		$down = $this->getSide(0);
-		if($down->getId() === self::GRASS or $down->getId() === self::DIRT or $down->getId() === self::FARMLAND) {
+		if($down->getId() === self::GRASS or $down->getId() === self::DIRT or $down->getId() === self::FARMLAND or $down->getId() === self::PODZOL) {
 			$this->getLevel()->setBlock($block, $this, true, true);
 
 			return true;
@@ -62,14 +64,20 @@ class Sapling extends Flowable {
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
+		if($item->getId() === Item::DYE and $item->getDamage() === 0x0F) { //Bonemeal
+			//TODO: change log type
+			Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(mt_rand()), $this->meta & 0x07, false);
+			if(($player->gamemode & 0x01) === 0) {
+				$item->count--;
+			}
+
+			return true;
+		}
+
 		return false;
 	}
 
-	public function onUpdate($type) {
-		return false;
-	}
-
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[$this->id, $this->meta & 0x07, 1],];
 	}
 }

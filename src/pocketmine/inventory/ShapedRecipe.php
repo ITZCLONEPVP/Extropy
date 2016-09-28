@@ -83,11 +83,11 @@ class ShapedRecipe implements Recipe {
 		return count($this->ingredients);
 	}
 
-	public function getResult() {
+	public function getResult() : Item {
 		return $this->output;
 	}
 
-	public function getId() {
+	public function getId() : UUID {
 		return $this->id;
 	}
 

@@ -44,7 +44,7 @@ class FurnaceRecipe implements Recipe {
 		$this->ingredient = clone $ingredient;
 	}
 
-	public function getId() {
+	public function getId() : UUID {
 		return $this->id;
 	}
 
@@ -70,10 +70,7 @@ class FurnaceRecipe implements Recipe {
 		return clone $this->ingredient;
 	}
 
-	/**
-	 * @return Item
-	 */
-	public function getResult() {
+	public function getResult() : Item {
 		return clone $this->output;
 	}
 

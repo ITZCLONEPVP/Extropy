@@ -22,13 +22,18 @@
 namespace pocketmine\item;
 
 
-class CookedFish extends Item {
+class CookedFish extends Fish {
 
 	public function __construct($meta = 0, $count = 1) {
-		parent::__construct(self::COOKED_FISH, $meta, $count, "Cooked Fish");
-		if($this->meta === 1) {
-			$this->name = "Cooked Salmon";
-		}
+		Food::__construct(self::COOKED_FISH, $meta, $count, $meta === self::FISH_SALMON ? "Cooked Salmon" : "Cooked Fish");
+	}
+
+	public function getFoodRestor() : int {
+		return $this->meta === self::FISH_SALMON ? 6 : 5;
+	}
+
+	public function getSaturationRestore() : float {
+		return $this->meta === self::FISH_SALMON ? 9.6 : 6;
 	}
 
 }

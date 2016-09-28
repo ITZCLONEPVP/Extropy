@@ -22,8 +22,6 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 class Flower extends Flowable {
@@ -44,7 +42,7 @@ class Flower extends Flowable {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		static $names = [self::TYPE_POPPY => "Poppy", self::TYPE_BLUE_ORCHID => "Blue Orchid", self::TYPE_ALLIUM => "Allium", self::TYPE_AZURE_BLUET => "Azure Bluet", self::TYPE_RED_TULIP => "Red Tulip", self::TYPE_ORANGE_TULIP => "Orange Tulip", self::TYPE_WHITE_TULIP => "White Tulip", self::TYPE_PINK_TULIP => "Pink Tulip", self::TYPE_OXEYE_DAISY => "Oxeye Daisy", 9 => "Unknown", 10 => "Unknown", 11 => "Unknown", 12 => "Unknown", 13 => "Unknown", 14 => "Unknown", 15 => "Unknown"];
 
 		return $names[$this->meta];
@@ -57,18 +55,6 @@ class Flower extends Flowable {
 			$this->getLevel()->setBlock($block, $this, true);
 
 			return true;
-		}
-
-		return false;
-	}
-
-	public function onUpdate($type) {
-		if($type === Level::BLOCK_UPDATE_NORMAL) {
-			if($this->getSide(Vector3::SIDE_DOWN)->isTransparent()) {
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
 		}
 
 		return false;

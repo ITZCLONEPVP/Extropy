@@ -26,7 +26,7 @@ use pocketmine\level\format\generic\BaseLevelProvider;
 use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
@@ -80,10 +80,10 @@ class McRegion extends BaseLevelProvider {
 			mkdir($path . "/region", 0777);
 		}
 		//TODO, add extra details
-		$levelData = new Compound("Data", ["hardcore" => new ByteTag("hardcore", 0), "initialized" => new ByteTag("initialized", 1), "GameType" => new IntTag("GameType", 0), "generatorVersion" => new IntTag("generatorVersion", 1), //2 in MCPE
-			"SpawnX" => new IntTag("SpawnX", 0), "SpawnY" => new IntTag("SpawnY", 10), "SpawnZ" => new IntTag("SpawnZ", 0), "version" => new IntTag("version", 19133), "DayTime" => new IntTag("DayTime", 0), "LastPlayed" => new LongTag("LastPlayed", microtime(true) * 1000), "RandomSeed" => new LongTag("RandomSeed", $seed), "SizeOnDisk" => new LongTag("SizeOnDisk", 0), "Time" => new LongTag("Time", 0), "generatorName" => new StringTag("generatorName", "FLAT"), "generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""), "LevelName" => new StringTag("LevelName", $name), "GameRules" => new Compound("GameRules", [])]);
+		$levelData = new CompoundTag("Data", ["hardcore" => new ByteTag("hardcore", 0), "initialized" => new ByteTag("initialized", 1), "GameType" => new IntTag("GameType", 0), "generatorVersion" => new IntTag("generatorVersion", 1), //2 in MCPE
+			"SpawnX" => new IntTag("SpawnX", 0), "SpawnY" => new IntTag("SpawnY", 10), "SpawnZ" => new IntTag("SpawnZ", 0), "version" => new IntTag("version", 19133), "DayTime" => new IntTag("DayTime", 0), "LastPlayed" => new LongTag("LastPlayed", microtime(true) * 1000), "RandomSeed" => new LongTag("RandomSeed", $seed), "SizeOnDisk" => new LongTag("SizeOnDisk", 0), "Time" => new LongTag("Time", 0), "generatorName" => new StringTag("generatorName", "FLAT"), "generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""), "LevelName" => new StringTag("LevelName", $name), "GameRules" => new CompoundTag("GameRules", [])]);
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->setData(new Compound("", ["Data" => $levelData]));
+		$nbt->setData(new CompoundTag("", ["Data" => $levelData]));
 		$buffer = $nbt->writeCompressed();
 		file_put_contents($path . "level.dat", $buffer);
 	}
@@ -201,7 +201,7 @@ class McRegion extends BaseLevelProvider {
 	}
 
 	private function getSignSpawnCompound($sign, $lang) {
-		return new Compound("", [new StringTag("id", Tile::SIGN), new StringTag("Text1", $this->updateSignText($sign->namedtag['Text1'], $lang)), new StringTag("Text2", $this->updateSignText($sign->namedtag['Text2'], $lang)), new StringTag("Text3", $this->updateSignText($sign->namedtag['Text3'], $lang)), new StringTag("Text4", $this->updateSignText($sign->namedtag['Text4'], $lang)), new IntTag("x", (int)$sign->x), new IntTag("y", (int)$sign->y), new IntTag("z", (int)$sign->z)]);
+		return new CompoundTag("", [new StringTag("id", Tile::SIGN), new StringTag("Text1", $this->updateSignText($sign->namedtag['Text1'], $lang)), new StringTag("Text2", $this->updateSignText($sign->namedtag['Text2'], $lang)), new StringTag("Text3", $this->updateSignText($sign->namedtag['Text3'], $lang)), new StringTag("Text4", $this->updateSignText($sign->namedtag['Text4'], $lang)), new IntTag("x", (int)$sign->x), new IntTag("y", (int)$sign->y), new IntTag("z", (int)$sign->z)]);
 	}
 
 	private function updateSignText($text, $lang) {

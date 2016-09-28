@@ -31,18 +31,15 @@ class Potato extends Crops {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Potato Block";
 	}
 
-	public function getDrops(Item $item) {
-		$drops = [];
+	public function getDrops(Item $item) : array {
 		if($this->meta >= 0x07) {
-			$drops[] = [Item::POTATO, 0, mt_rand(1, 4)];
-		} else {
-			$drops[] = [Item::POTATO, 0, 1];
+			return [Item::POTATO, 0, mt_rand(1, 4)];
 		}
 
-		return $drops;
+		return [Item::POTATO, 0, 1];
 	}
 }

@@ -40,13 +40,13 @@ class DoubleWoodSlab extends Solid {
 		return Tool::TYPE_AXE;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		static $names = [0 => "Oak", 1 => "Spruce", 2 => "Birch", 3 => "Jungle", 4 => "Acacia", 5 => "Dark Oak", 6 => "", 7 => ""];
 
 		return "Double " . $names[$this->meta & 0x07] . " Wooden Slab";
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[Item::WOOD_SLAB, $this->meta & 0x07, 2],];
 	}
 

@@ -23,7 +23,6 @@ namespace pocketmine\block;
 
 use pocketmine\event\block\BlockGrowEvent;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\math\Vector3 as Vector3;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -36,12 +35,12 @@ class Sugarcane extends Flowable {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Sugarcane";
 	}
 
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		return [[Item::SUGARCANE, 0, 1],];
 	}
 
@@ -66,38 +65,6 @@ class Sugarcane extends Flowable {
 			}
 
 			return true;
-		}
-
-		return false;
-	}
-
-	public function onUpdate($type) {
-		if($type === Level::BLOCK_UPDATE_NORMAL) {
-			$down = $this->getSide(0);
-			if($down->isTransparent() === true and $down->getId() !== self::SUGARCANE_BLOCK) {
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		} elseif($type === Level::BLOCK_UPDATE_RANDOM) {
-			if($this->getSide(0)->getId() !== self::SUGARCANE_BLOCK) {
-				if($this->meta === 0x0F) {
-					for($y = 1; $y < 3; ++$y) {
-						$b = $this->getLevel()->getBlock(new Vector3($this->x, $this->y + $y, $this->z));
-						if($b->getId() === self::AIR) {
-							$this->getLevel()->setBlock($b, new Sugarcane(), true);
-							break;
-						}
-					}
-					$this->meta = 0;
-					$this->getLevel()->setBlock($this, $this, true);
-				} else {
-					++$this->meta;
-					$this->getLevel()->setBlock($this, $this, true);
-				}
-
-				return Level::BLOCK_UPDATE_RANDOM;
-			}
 		}
 
 		return false;

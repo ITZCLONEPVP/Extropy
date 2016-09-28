@@ -35,7 +35,7 @@ class FenceGate extends Transparent {
 		$this->meta = $meta;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Oak Fence Gate";
 	}
 
@@ -43,7 +43,7 @@ class FenceGate extends Transparent {
 		return 2;
 	}
 
-	public function canBeActivated() {
+	public function canBeActivated() : bool {
 		return true;
 	}
 
@@ -59,13 +59,17 @@ class FenceGate extends Transparent {
 		return true;
 	}
 
-	public function getDrops(Item $item) {
+	public function isOpened() {
+		return (($this->getDamage() & 0x04) > 0);
+	}
+
+	public function getDrops(Item $item) : array {
 		return [[$this->id, 0, 1],];
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
 		$faces = [0 => 3, 1 => 0, 2 => 1, 3 => 2,];
-		$this->meta = ($faces[$player instanceof Player ? $player->getDirection() : 0] & 0x03) | ((~$this->meta) & 0x04);
+		if($player !== null) $this->meta = ($faces[$player instanceof Player ? $player->getDirection() : 0] & 0x03) | ((~$this->meta) & 0x04); else $this->meta ^= 0x04;
 		$this->getLevel()->setBlock($this, $this, true);
 		$this->level->addSound(new DoorSound($this));
 
@@ -79,7 +83,7 @@ class FenceGate extends Transparent {
 		}
 
 		$i = ($this->getDamage() & 0x03);
-		if($i === 2 and $i === 0) {
+		if($i === 2 or $i === 0) {
 			return new AxisAlignedBB($this->x, $this->y, $this->z + 0.375, $this->x + 1, $this->y + 1.5, $this->z + 0.625);
 		} else {
 			return new AxisAlignedBB($this->x + 0.375, $this->y, $this->z, $this->x + 0.625, $this->y + 1.5, $this->z + 1);

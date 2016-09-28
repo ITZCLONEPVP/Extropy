@@ -13,10 +13,10 @@ use pocketmine\level\Position;
 use pocketmine\math\Math;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
 
@@ -46,7 +46,7 @@ abstract class BaseEntity extends Creature {
 			$chunk->setPopulated();
 		}
 
-		$nbt = new Compound("", ["Pos" => new Enum("Pos", [new DoubleTag("", $source->x), new DoubleTag("", $source->y), new DoubleTag("", $source->z)]), "Motion" => new Enum("Motion", [new DoubleTag("", 0), new DoubleTag("", 0), new DoubleTag("", 0)]), "Rotation" => new Enum("Rotation", [new FloatTag("", $source instanceof Location ? $source->yaw : 0), new FloatTag("", $source instanceof Location ? $source->pitch : 0)]),]);
+		$nbt = new CompoundTag("", ["Pos" => new ListTag("Pos", [new DoubleTag("", $source->x), new DoubleTag("", $source->y), new DoubleTag("", $source->z)]), "Motion" => new ListTag("Motion", [new DoubleTag("", 0), new DoubleTag("", 0), new DoubleTag("", 0)]), "Rotation" => new ListTag("Rotation", [new FloatTag("", $source instanceof Location ? $source->yaw : 0), new FloatTag("", $source instanceof Location ? $source->pitch : 0)]),]);
 
 		return Entity::createEntity($type, $chunk, $nbt, ...$args);
 	}
@@ -104,7 +104,7 @@ abstract class BaseEntity extends Creature {
 	public function spawnTo(Player $player) {
 		if(!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$pk = new AddEntityPacket();
-			$pk->eid = $this->getID();
+			$pk->eid = $this->getId();
 			$pk->type = static::NETWORK_ID;
 			$pk->x = $this->x;
 			$pk->y = $this->y;

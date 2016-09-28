@@ -60,7 +60,8 @@ abstract class PluginBase implements Plugin {
 	/**
 	 * Called when the plugin is loaded, before calling onEnable()
 	 */
-	public function onLoad() {}
+	public function onLoad() {
+	}
 
 	/**
 	 * @return bool
@@ -86,12 +87,14 @@ abstract class PluginBase implements Plugin {
 	/**
 	 * Called after the plugin is loaded
 	 */
-	public function onEnable() {}
+	public function onEnable() {
+	}
 
 	/**
 	 * Called when the plugin is disabled
 	 */
-	public function onDisable() {}
+	public function onDisable() {
+	}
 
 	/**
 	 * @return bool

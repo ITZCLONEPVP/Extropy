@@ -36,7 +36,7 @@ class Cobblestone extends Solid {
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Cobblestone";
 	}
 
@@ -44,7 +44,7 @@ class Cobblestone extends Solid {
 		return 2;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 1) {
 			return [[Item::COBBLESTONE, 0, 1],];
 		} else {

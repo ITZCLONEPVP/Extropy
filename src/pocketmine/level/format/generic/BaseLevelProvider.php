@@ -25,7 +25,7 @@ use pocketmine\level\format\LevelProvider;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\utils\LevelException;
 
@@ -37,7 +37,7 @@ abstract class BaseLevelProvider implements LevelProvider {
 	/** @var string */
 	protected $path;
 
-	/** @var Compound */
+	/** @var CompoundTag */
 	protected $levelData;
 
 	public function __construct(Level $level, $path) {
@@ -49,7 +49,7 @@ abstract class BaseLevelProvider implements LevelProvider {
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 		$nbt->readCompressed(file_get_contents($this->getPath() . "level.dat"));
 		$levelData = $nbt->getData();
-		if($levelData->Data instanceof Compound) {
+		if($levelData->Data instanceof CompoundTag) {
 			$this->levelData = $levelData->Data;
 		} else {
 			throw new LevelException("Invalid level.dat");
@@ -103,7 +103,7 @@ abstract class BaseLevelProvider implements LevelProvider {
 	}
 
 	/**
-	 * @return Compound
+	 * @return CompoundTag
 	 */
 	public function getLevelData() {
 		return $this->levelData;
@@ -111,7 +111,7 @@ abstract class BaseLevelProvider implements LevelProvider {
 
 	public function saveLevelData() {
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->setData(new Compound("", ["Data" => $this->levelData]));
+		$nbt->setData(new CompoundTag("", ["Data" => $this->levelData]));
 		$buffer = $nbt->writeCompressed();
 		file_put_contents($this->getPath() . "level.dat", $buffer);
 	}

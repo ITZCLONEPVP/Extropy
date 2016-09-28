@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,51 +15,37 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
 
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
-
-
 use pocketmine\entity\Attribute;
 
 class UpdateAttributesPacket extends DataPacket {
 
 	const NETWORK_ID = Info::UPDATE_ATTRIBUTES_PACKET;
 
-	const HEALTH = "generic.health";
-	const HUNGER = "player.hunger";
-	const EXPERIENCE = "player.experience";
-	const EXPERIENCE_LEVEL = "player.level";
-
-
 	public $entityId;
 
-	public $minValue;
-
-	public $maxValue;
-
-	public $value;
-
-	public $name;
+	/** @var Attribute[] */
+	public $entries = [];
 
 	public function decode() {
-
 	}
 
 	public function encode() {
 		$this->reset();
-
 		$this->putLong($this->entityId);
-
-		$this->putShort(1);
-
-		$this->putFloat($this->minValue);
-		$this->putFloat($this->maxValue);
-		$this->putFloat($this->value);
-		$this->putString($this->name);
+		$this->putShort(count($this->entries));
+		foreach($this->entries as $entry) {
+			$this->putFloat($entry->getMinValue());
+			$this->putFloat($entry->getMaxValue());
+			$this->putFloat($entry->getValue());
+			$this->putString($entry->getName());
+		}
 	}
+
 }

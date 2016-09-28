@@ -22,8 +22,6 @@
 namespace pocketmine\utils;
 
 use LogLevel;
-use pocketmine\Thread;
-use pocketmine\Worker;
 
 class MainLogger extends \AttachableThreadedLogger {
 

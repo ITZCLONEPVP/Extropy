@@ -22,7 +22,6 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\Player;
 
 class Dandelion extends Flowable {
@@ -33,7 +32,7 @@ class Dandelion extends Flowable {
 
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Dandelion";
 	}
 
@@ -44,18 +43,6 @@ class Dandelion extends Flowable {
 			$this->getLevel()->setBlock($block, $this, true, true);
 
 			return true;
-		}
-
-		return false;
-	}
-
-	public function onUpdate($type) {
-		if($type === Level::BLOCK_UPDATE_NORMAL) {
-			if($this->getSide(0)->isTransparent() === true) {
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
 		}
 
 		return false;

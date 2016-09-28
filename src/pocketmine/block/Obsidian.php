@@ -23,16 +23,22 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\math\Vector3;
 
 class Obsidian extends Solid {
 
 	protected $id = self::OBSIDIAN;
 
-	public function __construct() {
+	/** @var Vector3 */
+	private $temporalVector = null;
 
+	public function __construct() {
+		if($this->temporalVector === null) {
+			$this->temporalVector = new Vector3(0, 0, 0);
+		}
 	}
 
-	public function getName() {
+	public function getName() : string {
 		return "Obsidian";
 	}
 
@@ -44,11 +50,11 @@ class Obsidian extends Solid {
 		return 50;
 	}
 
-	public function getDrops(Item $item) {
+	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 5) {
 			return [[Item::OBSIDIAN, 0, 1],];
-		} else {
-			return [];
 		}
+
+		return [];
 	}
 }
