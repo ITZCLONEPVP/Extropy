@@ -19,6 +19,9 @@
  *
 */
 
+/**
+ * NOTE: This is also the destroy block SOUND.
+ */
 namespace pocketmine\level\particle;
 
 use pocketmine\block\Block;

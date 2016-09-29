@@ -232,6 +232,28 @@ class Potion extends Food {
 		return $entity instanceof Human;
 	}
 
+	public function onConsume(Entity $human) {
+		$pk = new EntityEventPacket();
+		$pk->eid = $human->getId();
+		$pk->event = EntityEventPacket::USE_ITEM;
+		if($human instanceof Player) {
+			$human->dataPacket($pk);
+		}
+		Server::broadcastPacket($human->getViewers(), $pk);
+
+		foreach($this->getEffects() as $effect) {
+			$human->addEffect($effect);
+		}
+		//Don't set the held item to glass bottle if we're in creative
+		if($human instanceof Player) {
+			if($human->getGamemode() === 1) {
+				return;
+			}
+		}
+		$human->getInventory()->setItemInHand(Item::get(Item::GLASS_BOTTLE));
+
+	}
+
 	public function getEffects(): array {
 		return self::getEffectsById($this->meta);
 	}
@@ -247,32 +269,6 @@ class Potion extends Food {
 		}
 
 		return [];
-	}
-
-	public function onConsume(Entity $human) {
-		$pk = new EntityEventPacket();
-		$pk->eid = $human->getId();
-		$pk->event = EntityEventPacket::USE_ITEM;
-		if($human instanceof Player) {
-			$human->dataPacket($pk);
-		}
-		Server::broadcastPacket($human->getViewers(), $pk);
-
-		Server::getInstance()->getPluginManager()->callEvent($ev = new EntityDrinkPotionEvent($human, $this));
-
-		if(!$ev->isCancelled()) {
-			foreach($ev->getEffects() as $effect) {
-				$human->addEffect($effect);
-			}
-			//Don't set the held item to glass bottle if we're in creative
-			if($human instanceof Player) {
-				if($human->getGamemode() === 1) {
-					return;
-				}
-			}
-			$human->getInventory()->setItemInHand(Item::get(self::GLASS_BOTTLE));
-		}
-
 	}
 
 	public function getFoodRestoration() : int {

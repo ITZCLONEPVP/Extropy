@@ -1320,7 +1320,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			}
 
 			if($entity instanceof Arrow and $entity->hadCollision) {
-				$item = Item::get(Item::ARROW, 0, 1);
+				$item = Item::get(Item::ARROW, $entity->getPotionId(), 1);
 				if($this->isSurvival() and !$this->inventory->canAddItem($item)) {
 					continue;
 				}
@@ -2066,7 +2066,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					} elseif($item->getId() == Item::SPLASH_POTION) {
 						$nbt = new CompoundTag("", ["Pos" => new ListTag("Pos", [new DoubleTag("", $this->x), new DoubleTag("", $this->y + $this->getEyeHeight()), new DoubleTag("", $this->z)]), "Motion" => new ListTag("Motion", [new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)), new DoubleTag("", -sin($this->pitch / 180 * M_PI)), new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))]), "Rotation" => new ListTag("Rotation", [new FloatTag("", $this->yaw), new FloatTag("", $this->pitch)]), "PotionId" => new ShortTag("PotionId", $item->getDamage()),]);
 
-						$f = 1.1;
+						$f = 0.6;
 						$thrownPotion = new ThrownPotion($this->chunk, $nbt, $this);
 						$thrownPotion->setMotion($thrownPotion->getMotion()->multiply($f));
 						if($this->isSurvival()) {
@@ -2123,12 +2123,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						if($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
 							if($this->inventory->getItemInHand()->getId() === Item::BOW) {
 								$bow = $this->inventory->getItemInHand();
-								if($this->isSurvival() and !$this->inventory->contains(Item::get(Item::ARROW, 0, 1))) {
+								if($this->isSurvival() and !$this->inventory->contains(Item::get(Item::ARROW, null))) {
 									$this->inventory->sendContents($this);
 									break;
 								}
+								$arrow = false;
+								foreach($this->inventory->getContents() as $item) {
+									if($item->getId() == Item::ARROW) $arrow = $item;
+								}
+								if(!$arrow and $this->isCreative()) $arrow = Item::get(Item::ARROW, 0, 1);
+								if($arrow === false) break;
 
-								$nbt = new CompoundTag("", ["Pos" => new ListTag("Pos", [new DoubleTag("", $this->x), new DoubleTag("", $this->y + $this->getEyeHeight()), new DoubleTag("", $this->z)]), "Motion" => new ListTag("Motion", [new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)), new DoubleTag("", -sin($this->pitch / 180 * M_PI)), new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))]), "Rotation" => new ListTag("Rotation", [new FloatTag("", $this->yaw), new FloatTag("", $this->pitch)]), "Fire" => new ShortTag("Fire", $this->isOnFire() ? 45 * 60 : 0)]);
+								$nbt = new CompoundTag("", ["Pos" => new ListTag("Pos", [new DoubleTag("", $this->x), new DoubleTag("", $this->y + $this->getEyeHeight()), new DoubleTag("", $this->z)]), "Motion" => new ListTag("Motion", [new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)), new DoubleTag("", -sin($this->pitch / 180 * M_PI)), new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))]), "Rotation" => new ListTag("Rotation", [new FloatTag("", $this->yaw), new FloatTag("", $this->pitch)]), "Fire" => new ShortTag("Fire", $this->isOnFire() ? 45 * 60 : 0), "Potion" => new ShortTag("Potion", $arrow->getDamage())]);
 
 								$diff = ($this->server->getTick() - $this->startAction);
 								$p = $diff / 20;
@@ -2147,7 +2153,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 								} else {
 									$projectile->setMotion($ev->getProjectile()->getMotion()->multiply($ev->getForce()));
 									if($this->isSurvival()) {
-										$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
+										$this->inventory->removeItem(Item::get(Item::ARROW, $arrow->getDamage(), 1));
 										$bow->setDamage($bow->getDamage() + 1);
 										if($bow->getDamage() >= 385) {
 											$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
