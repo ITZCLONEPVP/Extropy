@@ -364,6 +364,8 @@ class Effect {
 		if($this->id === Effect::INVISIBILITY) {
 			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, false);
 			$entity->setDataProperty(Entity::DATA_SHOW_NAMETAG, Entity::DATA_TYPE_BYTE, 1);
+		} elseif($entity instanceof Human and $this->id === Effect::ABSORPTION) {
+			$entity->setAbsorption(0);
 		}
 	}
 }

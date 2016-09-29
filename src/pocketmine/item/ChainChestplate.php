@@ -26,6 +26,10 @@ class ChainChestplate extends Armor {
 
 	const SLOT_NUMBER = 1;
 
+	public function __construct($meta = 0, $count = 1) {
+		parent::__construct(self::CHAIN_CHESTPLATE, $meta, $count, "Chain Chestplate");
+	}
+
 	public function getArmorTier() {
 		return Armor::TIER_CHAIN;
 	}

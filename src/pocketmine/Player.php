@@ -764,11 +764,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$chunkX = $this->teleportPosition->x >> 4;
 			$chunkZ = $this->teleportPosition->z >> 4;
 
-			for($X = -1; $X <= 1; ++$X) {
-				for($Z = -1; $Z <= 1; ++$Z) {
-					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false) return false;
-				}
-			}
+//			for($X = -1; $X <= 1; ++$X) {
+//				for($Z = -1; $Z <= 1; ++$Z) {
+//					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false) return false;
+//				}
+//			}
 
 			$this->sendPosition($this, $this->pitch, $this->yaw, 1);
 			$this->forceMovement = $this->teleportPosition;
@@ -2354,7 +2354,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					}
 
 					$item = $this->inventory->getItemInHand();
-					$damage = [EntityDamageEvent::MODIFIER_BASE => $item->getModifyAttackDamage($target),];
+					$damage = [EntityDamageEvent::MODIFIER_BASE => $item->getAttackDamage(),];
 
 					if($this->distance($target) > 8) {
 						$cancelled = true;
@@ -2365,10 +2365,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 							$cancelled = true;
 						}
 
+						$armorValues = [Item::LEATHER_CAP => 1, Item::LEATHER_TUNIC => 3, Item::LEATHER_PANTS => 2, Item::LEATHER_BOOTS => 1, Item::CHAIN_HELMET => 1, Item::CHAIN_CHESTPLATE => 5, Item::CHAIN_LEGGINGS => 4, Item::CHAIN_BOOTS => 1, Item::GOLD_HELMET => 1, Item::GOLD_CHESTPLATE => 5, Item::GOLD_LEGGINGS => 3, Item::GOLD_BOOTS => 1, Item::IRON_HELMET => 2, Item::IRON_CHESTPLATE => 6, Item::IRON_LEGGINGS => 5, Item::IRON_BOOTS => 2, Item::DIAMOND_HELMET => 3, Item::DIAMOND_CHESTPLATE => 8, Item::DIAMOND_LEGGINGS => 6, Item::DIAMOND_BOOTS => 3,];
 						$points = 0;
 						foreach($target->getInventory()->getArmorContents() as $index => $i) {
-							if($i instanceof Armor) {
-								$points += $i->getArmorValue();
+							if(isset($armorValues[$i->getId()])) {
+								$points += $armorValues[$i->getId()];
 							}
 						}
 

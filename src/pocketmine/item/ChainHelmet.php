@@ -26,6 +26,10 @@ class ChainHelmet extends Armor {
 
 	const SLOT_NUMBER = 0;
 
+	public function __construct($meta = 0, $count = 1) {
+		parent::__construct(self::CHAIN_HELMET, $meta, $count, "Chain Helmet");
+	}
+
 	public function getArmorTier() {
 		return Armor::TIER_CHAIN;
 	}
