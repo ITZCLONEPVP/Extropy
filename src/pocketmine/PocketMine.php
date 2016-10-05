@@ -77,8 +77,8 @@ namespace pocketmine {
 	const VERSION = "1.6.0-hybrid";
 	const API_VERSION = "1.12.0";
 	const CODENAME = "剑 (Rapier)";
-	const MINECRAFT_VERSION = "v0.15.9 Alpha";
-	const MINECRAFT_VERSION_NETWORK = "0.15.9";
+	const MINECRAFT_VERSION = "v0.15.10 Alpha";
+	const MINECRAFT_VERSION_NETWORK = "0.15.10";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
