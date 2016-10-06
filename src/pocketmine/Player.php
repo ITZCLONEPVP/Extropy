@@ -187,9 +187,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	/** @var Vector3 */
 	public $newPosition;
 
-	/**@var string */
-	public $language = 'English';
-
 	/** @var SourceInterface */
 	protected $interface;
 
@@ -386,7 +383,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 *
 	 * @return string
 	 */
-	public function getName() : string {
+	public function getName() {
 		return $this->username;
 	}
 
@@ -489,6 +486,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 		$flags |= 0x02;
 		$flags |= 0x04;
+		$flags |= 0x08;
 
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
@@ -638,7 +636,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * @return string
 	 */
 	public function getNameTag() {
-		return $this->nameTag;
+		return $this->nametag;
 	}
 
 	/**
@@ -649,15 +647,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function sendChunk($x, $z, $payload) {
-		if($this->connected === false) {
-			return;
-		}
+		if(!$this->connected) return;
 
-		if(isset($payload[$this->language])) {
-			$data = $payload[$this->language];
-		} else {
-			$data = $payload['English'];
-		}
+		$data = $payload;
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
@@ -689,18 +681,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * @return boolean
 	 */
 	public function sleepOn(Vector3 $pos) {
-		foreach($this->level->getNearbyEntities($this->boundingBox->grow(2, 1, 2), $this) as $p) {
-			if($p instanceof Player) {
-				if($p->sleeping !== null and $pos->distance($p->sleeping) <= 0.1) {
-					return false;
-				}
-			}
-		}
+		foreach($this->level->getNearbyEntities($this->boundingBox->grow(2, 1, 2), $this) as $p)
+			if($p instanceof Player and $p->sleeping !== null and $pos->distance($p->sleeping) <= 0.1) return false;
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerBedEnterEvent($this, $this->level->getBlock($pos)));
-		if($ev->isCancelled()) {
-			return false;
-		}
+		if($ev->isCancelled()) return false;
 
 		$this->sleeping = clone $pos;
 		$this->teleport(new Position($pos->x + 0.5, $pos->y - 0.5, $pos->z + 0.5, $this->level));
@@ -715,25 +700,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
-		if(!$this->isOnline()) {
-			return;
-		}
+		if(!$this->isOnline()) return;
 
 		$oldPos = $this->getPosition();
 		if(parent::teleport($pos, $yaw, $pitch)) {
-
 			foreach($this->windowIndex as $window) {
-				if($window === $this->inventory) {
-					continue;
-				}
+				if($window === $this->inventory) continue;
 				$this->removeWindow($window);
 			}
 
 			$this->teleportPosition = new Vector3($this->x, $this->y, $this->z);
 
-			if(!$this->checkTeleportPosition()) {
-				$this->forceMovement = $oldPos;
-			}
+			if(!$this->checkTeleportPosition()) $this->forceMovement = $oldPos;
 
 
 			$this->resetFallDistance();
@@ -746,7 +724,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * @return bool
 	 */
 	public function isOnline() {
-		return $this->connected === true and $this->loggedIn === true;
+		return $this->connected and $this->loggedIn;
 	}
 
 	public function removeWindow(Inventory $inventory) {
@@ -760,16 +738,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	protected function checkTeleportPosition() : bool {
-		if($this->teleportPosition instanceof Vector3) {
-			$chunkX = $this->teleportPosition->x >> 4;
-			$chunkZ = $this->teleportPosition->z >> 4;
-
-//			for($X = -1; $X <= 1; ++$X) {
-//				for($Z = -1; $Z <= 1; ++$Z) {
-//					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false) return false;
-//				}
-//			}
-
+		if($this->teleportPosition !== null) {
 			$this->sendPosition($this, $this->pitch, $this->yaw, 1);
 			$this->forceMovement = $this->teleportPosition;
 			$this->teleportPosition = null;
@@ -804,9 +773,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 	public function resetFallDistance() {
 		parent::resetFallDistance();
-		if($this->inAirTicks !== 0) {
-			$this->startAirTicks = 5;
-		}
+		if($this->inAirTicks > 0) $this->startAirTicks = 5;
 		$this->inAirTicks = 0;
 	}
 
@@ -817,16 +784,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * @param Vector3|Position $pos
 	 */
 	public function setSpawn(Vector3 $pos) {
-		if(!($pos instanceof Position)) {
-			$level = $this->level;
-		} else {
-			$level = $pos->getLevel();
-		}
+		$level = $this->level;
+		if($pos instanceof Position) $level = $pos->getLevel();
 		$this->spawnPosition = new Position($pos->x, $pos->y, $pos->z, $level);
 		$pk = new SetSpawnPositionPacket();
-		$pk->x = (int)$this->spawnPosition->x;
-		$pk->y = (int)$this->spawnPosition->y;
-		$pk->z = (int)$this->spawnPosition->z;
+		$pk->x = $this->spawnPosition->x;
+		$pk->y = $this->spawnPosition->y;
+		$pk->z = $this->spawnPosition->z;
 		$this->dataPacket($pk);
 	}
 
@@ -885,10 +849,36 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 		$this->sendAttributes();
 
-		$this->timings->startTiming();
-
 		$this->checkTeleportPosition();
+		if($this->chunk === null or ($this->chunk->getX() !== ($this->x >> 4) or $this->chunk->getZ() !== ($this->z >> 4))) {
+			if($this->chunk !== null) {
+				$this->chunk->removeEntity($this);
+			}
+			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
+			if($this->chunk !== null) {
+				$this->chunk->addEntity($this);
+			}
+		}
 
+		if(!$this->justCreated) {
+			$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
+			unset($newChunk[$this->getId()]);
+
+			/** @var Player[] $reload */
+			//$reload = [];
+			foreach($this->hasSpawned as $player) {
+				if(!isset($newChunk[$player->getId()])) {
+					$this->despawnFrom($player);
+				} else {
+					unset($newChunk[$player->getId()]);
+					//$reload[] = $player;
+				}
+			}
+
+			foreach($newChunk as $player) {
+				$this->spawnTo($player);
+			}
+		}
 		if($this->nextChunkOrderRun-- <= 0 or $this->chunk === null) {
 			$this->orderChunks();
 		}
@@ -902,7 +892,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			if($this->deadTicks >= 10) {
 				$this->despawnFromAll();
 			}
-			$this->timings->stopTiming();
 
 			return $this->deadTicks < 10;
 		}
@@ -913,38 +902,36 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 			if(!$this->isSpectator() and $this->speed !== null) {
 				if($this->isOnGround() or $this->isCollideWithLiquid()) {
-					if($this->inAirTicks !== 0) {
-						$this->startAirTicks = 5;
-					}
+					if($this->inAirTicks !== 0) $this->startAirTicks = 5;
 					$this->inAirTicks = 0;
 				} else {
-					if(!$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping()) {
+					if(!$this->server->getAllowFlight() and !$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping()) {
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
-						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.5 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()) {
-							if($this->inAirTicks < 20 * 6) {
+						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.5 and $expectedVelocity < $this->speed->y) {
+							if($this->inAirTicks > 20 * 10) {
+								if(floor(microtime(true) - $this->lastDamageTime) > 10 and round(microtime(true) - ($this->loggedInTime === 0 ? microtime(true) : $this->loggedInTime)) > 20) {
+									$this->kick(TextFormat::RED . "Flying is not enabled on this server!");
+									return false;
+								}
+							} elseif($this->isSurvival() or $this->isAdventure() and $this->server->shouldCheckMovement()) {
 								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
-							} elseif(floor(microtime(true) - $this->lastDamageTime) > 10 and round(microtime(true) - ($this->loggedInTime === 0 ? microtime(true) : $this->loggedInTime)) > 20) {
-								$this->kick(TextFormat::RED . "Flying is not enabled on this server!");
-								$this->timings->stopTiming();
-
-								return false;
 							}
 						}
 					}
 					++$this->inAirTicks;
 				}
 			}
-
 			$this->checkChunks();
 		}
-
-		$this->timings->stopTiming();
 
 		return true;
 	}
 
+	/**
+	 * Sync the players attributes with the server
+	 */
 	public function sendAttributes() {
 		$entries = $this->attributeMap->needSend();
 		if(count($entries) > 0) {
@@ -958,10 +945,27 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 	}
 
-	protected function orderChunks() {
-		if($this->connected === false) {
-			return false;
+	public function spawnTo(Player $player) {
+		if($player->spawned === true and $player->dead !== true and $player->getLevel() === $this->level and $player->canSee($this) and !$this->isSpectator()) {
+			parent::spawnTo($player);
 		}
+	}
+
+	public function canSee(Player $player) : bool {
+		return !isset($this->hiddenPlayers[$player->getName()]);
+	}
+
+	//	public function setDataProperty($id, $type, $value){
+	//		if(parent::setDataProperty($id, $type, $value)){
+	//			$this->sendData([$this], [$id => $this->dataProperties[$id]]);
+	//			return true;
+	//		}
+	//
+	//		return false;
+	//	}
+
+	protected function orderChunks() {
+		if(!$this->connected) return false;
 		$this->nextChunkOrderRun = 200;
 		$radiusSquared = $this->viewDistance;
 		$radius = ceil(sqrt($radiusSquared));
@@ -986,9 +990,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		asort($currentQueue);
 		$limit = $this->viewDistance;
 		foreach($currentQueue as $index => $distance) {
-			if($limit-- <= 0) {
-				break;
-			}
+			if($limit-- <= 0) break;
 			unset($lastChunk[$index]);
 		}
 		foreach($lastChunk as $index => $Yndex) {
@@ -1002,9 +1004,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$count = $loadedChunks;
 			$this->loadQueue = [];
 			foreach($newOrder as $k => $distance) {
-				if(++$count > $this->viewDistance) {
-					break;
-				}
+				if(++$count > $this->viewDistance) break;
 				$this->loadQueue[$k] = $distance;
 			}
 		} else {
@@ -1018,42 +1018,26 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$index = Level::chunkHash($x, $z);
 		if(isset($this->usedChunks[$index])) {
 			foreach($this->level->getChunkEntities($x, $z) as $entity) {
-				if($entity !== $this) {
-					$entity->despawnFrom($this);
-				}
+				if($entity !== $this) $entity->despawnFrom($this);
 			}
-
 			unset($this->usedChunks[$index]);
 		}
 		$this->level->freeChunk($x, $z, $this);
 		unset($this->loadQueue[$index]);
 	}
 
-	//	public function setDataProperty($id, $type, $value){
-	//		if(parent::setDataProperty($id, $type, $value)){
-	//			$this->sendData([$this], [$id => $this->dataProperties[$id]]);
-	//			return true;
-	//		}
-	//
-	//		return false;
-	//	}
-
 	protected function sendNextChunk() {
-		if($this->connected === false) {
-			return;
-		}
+		if(!$this->connected) return;
 
 		$count = 0;
 		foreach($this->loadQueue as $index => $distance) {
-			if($count >= $this->chunksPerTick) {
-				break;
-			}
+			if($count >= $this->chunksPerTick) break;
 
 			$X = null;
 			$Z = null;
 			Level::getXZ($index, $X, $Z);
 
-			++$count;
+			$count++;
 
 			unset($this->loadQueue[$index]);
 			$this->usedChunks[$index] = false;
@@ -1071,7 +1055,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			}
 		}
 
-		if($this->chunkLoadCount >= 36 and $this->spawned === false) {
+		if($this->chunkLoadCount >= 36 and !$this->spawned) {
 			$this->spawned = true;
 
 			$this->sendSettings();
@@ -1134,19 +1118,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			return $this->spawnPosition;
 		} else {
 			$level = $this->server->getDefaultLevel();
-
 			return $level->getSafeSpawn();
 		}
-	}
-
-	public function isSleeping() : bool {
-		return $this->sleeping !== null;
 	}
 
 	protected function processMovement($tickDiff) {
 		if(!$this->isAlive() or !$this->spawned or $this->newPosition === null or $this->teleportPosition !== null) {
 			$this->setMoving(false);
-
 			return;
 		}
 
@@ -1158,9 +1136,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if(($distanceSquared / ($tickDiff ** 2)) > 100) {
 			$revert = true;
 		} else {
-			if($this->chunk === null or !$this->chunk->isGenerated()) {
+			if($this->chunk == null or !$this->chunk->isGenerated()) {
 				$chunk = $this->level->getChunk($newPos->x >> 4, $newPos->z >> 4, false);
-				if($chunk === null or !$chunk->isGenerated()) {
+				if($chunk == null or !$chunk->isGenerated()) {
 					$revert = true;
 					$this->nextChunkOrderRun = 0;
 				} else {
@@ -1375,6 +1353,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		return ($this->gamemode & 0x01) === 0;
 	}
 
+	public function isSleeping() : bool {
+		return $this->sleeping !== null;
+	}
+
 	public function setMotion(Vector3 $mot, bool $forceUpdate = true) : bool {
 		if(parent::setMotion($mot, $forceUpdate)) {
 			if($this->chunk !== null) {
@@ -1546,10 +1528,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 	}
 
-	public function canSee(Player $player) : bool {
-		return !isset($this->hiddenPlayers[$player->getName()]);
-	}
-
 	public function showPlayer(Player $player) {
 		if($player === $this) {
 			return;
@@ -1557,12 +1535,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		unset($this->hiddenPlayers[$player->getName()]);
 		if($player->isOnline()) {
 			$player->spawnTo($this);
-		}
-	}
-
-	public function spawnTo(Player $player) {
-		if($this->spawned === true and $player->spawned === true and $this->dead !== true and $player->dead !== true and $player->getLevel() === $this->level and $player->canSee($this) and !$this->isSpectator()) {
-			parent::spawnTo($player);
 		}
 	}
 
@@ -1581,16 +1553,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
 			unset($newChunk[$this->getId()]);
 
+			/** @var Player[] $reload */
+			//$reload = [];
 			foreach($this->hasSpawned as $player) {
 				if(!isset($newChunk[$player->getId()])) {
 					$this->despawnFrom($player);
 				} else {
 					unset($newChunk[$player->getId()]);
+					//$reload[] = $player;
 				}
 			}
 
 			foreach($newChunk as $player) {
-				$this->respawnTo($player);
+				$this->spawnTo($player);
 			}
 		}
 	}
@@ -2365,11 +2340,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 							$cancelled = true;
 						}
 
-						$armorValues = [Item::LEATHER_CAP => 1, Item::LEATHER_TUNIC => 3, Item::LEATHER_PANTS => 2, Item::LEATHER_BOOTS => 1, Item::CHAIN_HELMET => 1, Item::CHAIN_CHESTPLATE => 5, Item::CHAIN_LEGGINGS => 4, Item::CHAIN_BOOTS => 1, Item::GOLD_HELMET => 1, Item::GOLD_CHESTPLATE => 5, Item::GOLD_LEGGINGS => 3, Item::GOLD_BOOTS => 1, Item::IRON_HELMET => 2, Item::IRON_CHESTPLATE => 6, Item::IRON_LEGGINGS => 5, Item::IRON_BOOTS => 2, Item::DIAMOND_HELMET => 3, Item::DIAMOND_CHESTPLATE => 8, Item::DIAMOND_LEGGINGS => 6, Item::DIAMOND_BOOTS => 3,];
 						$points = 0;
 						foreach($target->getInventory()->getArmorContents() as $index => $i) {
-							if(isset($armorValues[$i->getId()])) {
-								$points += $armorValues[$i->getId()];
+							if($i instanceof Armor) {
+								$points += $i->getArmorValue();
 							}
 						}
 

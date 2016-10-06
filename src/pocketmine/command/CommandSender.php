@@ -30,7 +30,7 @@ interface CommandSender extends Permissible {
 
 	public function getServer() : Server;
 
-	public function getName() : string;
+	public function getName();
 
 
 }

@@ -103,11 +103,8 @@ class Network {
 	private $name;
 
 	public function __construct(Server $server) {
-
 		$this->registerPackets();
-
 		$this->server = $server;
-
 	}
 
 	private function registerPackets() {

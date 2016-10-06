@@ -94,39 +94,24 @@ class McRegion extends BaseLevelProvider {
 
 	public function requestChunkTask($x, $z) {
 		$chunk = $this->getChunk($x, $z, false);
-		if(!($chunk instanceof Chunk)) {
-			throw new ChunkException("Invalid Chunk sent");
-		}
-
-		$signTiles = [];
-		$translation = $this->getServer()->getSignTranslation();
-		foreach($translation as $lang => $data) {
-			$signTiles[$lang] = "";
-		}
-
-		$tiles = "";
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);
-		foreach($chunk->getTiles() as $tile) {
-			if($tile instanceof Sign) {
-				foreach($translation as $lang => $data) {
-					$nbt->setData($this->getSignSpawnCompound($tile, $data));
-					$signTiles[$lang] .= $nbt->write();
-				}
-
-				continue;
-			}
-			if($tile instanceof Spawnable) {
-				$nbt->setData($tile->getSpawnCompound());
-				$tiles .= $nbt->write();
-			}
-		}
+		if(!$chunk instanceof Chunk) throw new ChunkException("Invalid Chunk sent");
 
 		$data = [];
-		$data['chunkX'] = $x;
-		$data['chunkZ'] = $z;
-		$data['tiles'] = $tiles;
-		$data['signTiles'] = $signTiles;
-		$data['chunk'] = $chunk->toFastBinary();
+		$data["chunkX"] = $x;
+		$data["chunkZ"] = $z;
+		$data["tiles"] = "";
+
+		if(count($rawTiles = $chunk->getTiles()) > 0) {
+			$nbt = new NBT(NBT::LITTLE_ENDIAN);
+			foreach($rawTiles as $tile) {
+				if($tile instanceof Spawnable) {
+					$nbt->setData($tile->getSpawnCompound());
+					$data ["tiles"] .= $nbt->write();
+				}
+			}
+		}
+
+		$data["chunk"] = $chunk->toFastBinary();
 
 		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
 
@@ -198,19 +183,6 @@ class McRegion extends BaseLevelProvider {
 
 	public function getEmptyChunk($chunkX, $chunkZ) {
 		return Chunk::getEmptyChunk($chunkX, $chunkZ, $this);
-	}
-
-	private function getSignSpawnCompound($sign, $lang) {
-		return new CompoundTag("", [new StringTag("id", Tile::SIGN), new StringTag("Text1", $this->updateSignText($sign->namedtag['Text1'], $lang)), new StringTag("Text2", $this->updateSignText($sign->namedtag['Text2'], $lang)), new StringTag("Text3", $this->updateSignText($sign->namedtag['Text3'], $lang)), new StringTag("Text4", $this->updateSignText($sign->namedtag['Text4'], $lang)), new IntTag("x", (int)$sign->x), new IntTag("y", (int)$sign->y), new IntTag("z", (int)$sign->z)]);
-	}
-
-	private function updateSignText($text, $lang) {
-		if(empty($text)) {
-			return "";
-		}
-
-		return str_replace($lang['key'], $lang['val'], $text);
-
 	}
 
 	public function getLoadedChunks() {

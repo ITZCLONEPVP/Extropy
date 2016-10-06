@@ -126,8 +126,6 @@ class Level implements ChunkManager, Metadatable {
 
 	public static $COMPRESSION_LEVEL = 8;
 
-	protected static $isMemoryLeakHappend = false;
-
 	private static $levelIdCounter = 1;
 
 	/** @var Entity[] */
@@ -283,7 +281,7 @@ class Level implements ChunkManager, Metadatable {
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
-		$this->chunkMaker = new ChunkMaker($this->server->getLoader());
+		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getProperty("chunk-sending.compression-level", 7));
 		$this->generator = Generator::getGenerator($this->provider->getGenerator());
 	}
 
@@ -859,9 +857,9 @@ class Level implements ChunkManager, Metadatable {
 
 		$this->checkTime();
 
-		if(($currentTick % 200) === 0) {
-			$this->sendTime();
-		}
+//		if(($currentTick % 200) === 0) {
+//			$this->sendTime();
+//		}
 
 		$this->unloadChunks();
 
@@ -980,7 +978,7 @@ class Level implements ChunkManager, Metadatable {
 		}
 
 		while(($data = unserialize($this->chunkMaker->readThreadToMainPacket()))) {
-			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data);
+			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data["payload"]);
 		}
 		$this->timings->doTick->stopTiming();
 	}
@@ -990,7 +988,7 @@ class Level implements ChunkManager, Metadatable {
 	 * Changes to this function won't be recorded on the version.
 	 */
 	public function checkTime() {
-		if($this->stopTime == true) {
+		if($this->stopTime) {
 			return;
 		} else {
 			$this->time += 1.25;
@@ -1049,33 +1047,7 @@ class Level implements ChunkManager, Metadatable {
 			$fullState = 0;
 		}
 
-		//		$mem1 = round((memory_get_usage() / 1024) / 1024, 2);
-		//		$mem2 = round((memory_get_usage(true) / 1024) / 1024, 2);
-
 		$block = clone $this->blockStates[$fullState & 0xfff];
-
-		//		$mem12 = round((memory_get_usage() / 1024) / 1024, 2);
-		//		$mem22 = round((memory_get_usage(true) / 1024) / 1024, 2);
-
-		//		$memDiff = ($mem12 - $mem1) + ($mem22 - $mem2);
-		//		if (!self::$isMemoryLeakHappend && $memDiff >= 10) {
-		//		if ($memDiff >= 10) {
-		//			self::$isMemoryLeakHappend = true;
-		//
-		//			$filename = './logs/memoryleak.log';
-		//			$message = 'TIME: '.date('H:i:s').PHP_EOL;
-		//			$message .= 'MEM DIFF : '.$memDiff.PHP_EOL;
-		//			$message .= 'CULPRIT : '.$block->getId().' : '.$block->getName().PHP_EOL;
-		//
-		//			$backtrace = debug_backtrace(0, 8);
-		//			foreach ($backtrace as $k => $v) {
-		//				$message .= "[line ".$backtrace[$k]['line']."] ".$backtrace[$k]['class']." -> ".$backtrace[$k]['function'].PHP_EOL;
-		//			}
-		//			$message .= PHP_EOL;
-		//
-		//			file_put_contents($filename, $message, FILE_APPEND | LOCK_EX);
-		//		}
-		//
 		$block->x = $pos->x;
 		$block->y = $pos->y;
 		$block->z = $pos->z;
@@ -1087,7 +1059,6 @@ class Level implements ChunkManager, Metadatable {
 	private function tickChunks() {
 		if($this->chunksPerTick <= 0 or count($this->players) === 0) {
 			$this->chunkTickList = [];
-
 			return;
 		}
 

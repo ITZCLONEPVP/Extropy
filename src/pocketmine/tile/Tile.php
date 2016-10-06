@@ -25,7 +25,6 @@
  */
 namespace pocketmine\tile;
 
-use pocketmine\event\Timings;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\Level;
@@ -73,21 +72,14 @@ abstract class Tile extends Position {
 
 	public $namedtag;
 
-	/** @var \pocketmine\event\TimingsHandler */
-	public $tickTimer;
-
 	protected $lastUpdate;
 
 	protected $server;
-
-	protected $timings;
 
 	public function __construct(FullChunk $chunk, CompoundTag $nbt) {
 		if($chunk === null or $chunk->getProvider() === null) {
 			throw new ChunkException("Invalid garbage Chunk given to Tile");
 		}
-
-		$this->timings = Timings::getTileEntityTimings($this);
 
 		$this->server = $chunk->getProvider()->getLevel()->getServer();
 		$this->chunk = $chunk;
@@ -102,7 +94,6 @@ abstract class Tile extends Position {
 
 		$this->chunk->addTile($this);
 		$this->getLevel()->addTile($this);
-		$this->tickTimer = Timings::getTileEntityTimings($this);
 	}
 
 	/**

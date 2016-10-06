@@ -7,20 +7,26 @@ use pocketmine\utils\Binary;
 
 class ChunkMaker extends Worker {
 
-
+	/** @var \ClassLoader */
 	protected $classLoader;
 
-	protected $shutdown;
+	/** @var bool */
+	protected $shutdown = false;
 
+	/** @var \Threaded */
 	protected $externalQueue;
 
+	/** @var \Threaded */
 	protected $internalQueue;
 
-	public function __construct(\ClassLoader $loader = null) {
+	/** @var int */
+	protected $compressionLevel;
+
+	public function __construct(\ClassLoader $loader = null, $compressionLevel = 7) {
+		$this->classLoader = $loader;
 		$this->externalQueue = new \Threaded;
 		$this->internalQueue = new \Threaded;
-		$this->shutdown = false;
-		$this->classLoader = $loader;
+		$this->compressionLevel = $compressionLevel;
 		$this->start(PTHREADS_INHERIT_CONSTANTS);
 	}
 
@@ -71,42 +77,36 @@ class ChunkMaker extends Worker {
 
 	protected function doChunk($data) {
 		$offset = 8;
-		$blockIdArray = substr($data['chunk'], $offset, 32768);
+		$blockIdArray = substr($data["chunk"], $offset, 32768);
 		$offset += 32768;
-		$blockDataArray = substr($data['chunk'], $offset, 16384);
+		$blockDataArray = substr($data["chunk"], $offset, 16384);
 		$offset += 16384;
-		$skyLightArray = substr($data['chunk'], $offset, 16384);
+		$skyLightArray = substr($data["chunk"], $offset, 16384);
 		$offset += 16384;
-		$blockLightArray = substr($data['chunk'], $offset, 16384);
+		$blockLightArray = substr($data["chunk"], $offset, 16384);
 		$offset += 16384;
-		$heightMapArray = array_values(unpack("C*", substr($data['chunk'], $offset, 256)));
+		$heightMapArray = array_values(unpack("C*", substr($data["chunk"], $offset, 256)));
 		$offset += 256;
-		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));
+		$biomeColorArray = array_values(unpack("N*", substr($data["chunk"], $offset, 1024)));
 
-		$languages = ['English', 'German', 'Spanish'];
-
-		$chunkDataWithoutSigns = $blockIdArray . $blockDataArray . $skyLightArray . $blockLightArray . pack("C*", ...$heightMapArray) . pack("N*", ...$biomeColorArray) . Binary::writeLInt(0) . $data['tiles'];
+		$ordered = $blockIdArray . $blockDataArray . $skyLightArray . $blockLightArray . pack("C*", ...$heightMapArray) . pack("N*", ...$biomeColorArray) . Binary::writeLInt(0) . $data["tiles"];
 
 		$result = [];
-		$result['chunkX'] = $data['chunkX'];
-		$result['chunkZ'] = $data['chunkZ'];
-		foreach($languages as $lang) {
-			if(!isset($data['signTiles'][$lang])) {
-				continue;
-			}
-			$chunkData = $chunkDataWithoutSigns . $data['signTiles'][$lang];
-			$pk = new FullChunkDataPacket();
-			$pk->chunkX = $data['chunkX'];
-			$pk->chunkZ = $data['chunkZ'];
-			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
-			$pk->data = $chunkData;
-			$pk->encode();
-			if(!empty($pk->buffer)) {
-				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-				$result[$lang] = $ordered;
-			}
+		$result["chunkX"] = $data["chunkX"];
+		$result["chunkZ"] = $data["chunkZ"];
+
+		$pk = new FullChunkDataPacket();
+		$pk->chunkX = $data["chunkX"];
+		$pk->chunkZ = $data["chunkZ"];
+		$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
+		$pk->data = $ordered;
+		$pk->encode();
+		if(!empty($pk->buffer)) {
+			$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
+			$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->compressionLevel);
+			$result["payload"] = $ordered;
 		}
+
 		$this->externalQueue[] = serialize($result);
 	}
 

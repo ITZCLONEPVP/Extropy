@@ -17,21 +17,18 @@ messages:
  command-permissions: "§cYou don't have permissions to use this command."
 
 main:
- #Block unknown items from creative-mode players
- filter-creative-items: true
- 
  #Shuffle the player list to prevent players from 'gaming' the server, getting high priority on the tick list.
  #Value is in ticks, so 20 = shuffle each second
- player-shuffle: 0
+ player-shuffle: 120
 
  #Checks movement of players in survival mode and reverts them if not valid
  #Creative mode is not affected
- check-movement: true
-
- #Do entity block collision checks. This includes damage by blocks, falling on water, climbing blocks
- #Value is in ticks, so 1 = check each tick. If 0, disable collision checks
- check-block-collision: 1
+ check-movement: false
 
  #Enables RakLib client/server port checking
  #Proxied servers might have to disable this option
  session-port-checking: true
+
+ #Generate new chunks when a player reaches empty chunks
+ #Servers that don't require new terrain generation should disable this option
+ generate-chunks: false

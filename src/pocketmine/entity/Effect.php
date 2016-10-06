@@ -359,13 +359,21 @@ class Effect {
 			$pk->effectId = $this->getId();
 
 			$entity->dataPacket($pk);
+
+			if($this->id === Effect::SPEED) {
+				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
+				$attr->setValue($attr->getValue() / (1 + 0.2 * ($this->amplifier + 1)));
+			} elseif($this->id === Effect::SLOWNESS) {
+				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
+				$attr->setValue($attr->getValue() / (1 - 0.15 * ($this->amplifier + 1)));
+			} elseif($entity instanceof Human and $this->id === Effect::SWIFTNESS) {
+				$entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.1);
+			}
 		}
 
 		if($this->id === Effect::INVISIBILITY) {
 			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, false);
 			$entity->setDataProperty(Entity::DATA_SHOW_NAMETAG, Entity::DATA_TYPE_BYTE, 1);
-		} elseif($entity instanceof Human and $this->id === Effect::ABSORPTION) {
-			$entity->setAbsorption(0);
 		}
 	}
 }

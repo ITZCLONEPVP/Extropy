@@ -27,6 +27,7 @@ use pocketmine\command\defaults\BanListCommand;
 use pocketmine\command\defaults\DefaultGamemodeCommand;
 use pocketmine\command\defaults\DeopCommand;
 use pocketmine\command\defaults\DifficultyCommand;
+use pocketmine\command\defaults\DumpMemoryCommand;
 use pocketmine\command\defaults\EffectCommand;
 use pocketmine\command\defaults\GamemodeCommand;
 use pocketmine\command\defaults\GiveCommand;
@@ -57,9 +58,6 @@ use pocketmine\command\defaults\VersionCommand;
 use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
-
-//use pocketmine\command\defaults\MeCommand;
-//use pocketmine\command\defaults\TellCommand;
 
 class SimpleCommandMap implements CommandMap {
 
@@ -111,6 +109,7 @@ class SimpleCommandMap implements CommandMap {
 		$this->register("pocketmine", new TimeCommand("time"));
 		$this->register("pocketmine", new TimingsCommand("timings"));
 		$this->register("pocketmine", new ReloadCommand("reload"));
+		$this->register("pocketmine", new DumpMemoryCommand("dumpmemory"));
 
 		if($this->server->getProperty("debug.commands", false) === true) {
 			$this->register("pocketmine", new StatusCommand("status"));

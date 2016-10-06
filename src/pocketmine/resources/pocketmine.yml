@@ -11,7 +11,6 @@ settings:
  #Enable plugin and core profiling by default
  enable-profiling: true
  advanced-cache: true
- upnp-forwarding: false
  #Sends anonymous statistics to create usage reports
  send-usage: true
  #Number of AsyncTask workers
@@ -74,15 +73,12 @@ spawn-limits:
 
 auto-report:
  #Send crash reports for processing
- enabled: true
- send-code: true
- send-settings: true
+ enabled: false
+ send-code: false
+ send-settings: false
  send-phpinfo: false
  host: crash.pocketmine.net
 
-aliases:
- #Examples:
- #showtheversion: version
- #savestop: [save-all, stop]
+aliases: []
 
-worlds:
+worlds: []

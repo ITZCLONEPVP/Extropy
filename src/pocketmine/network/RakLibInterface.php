@@ -41,7 +41,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 
 	public $maxcount = 31360;
 
-	public $name = "Lifeboat Network";
+	public $name = "Extropy Server";
 
 	/** @var Server */
 	private $server;
