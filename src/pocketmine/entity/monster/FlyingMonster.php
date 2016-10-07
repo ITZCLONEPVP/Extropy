@@ -124,7 +124,6 @@ abstract class FlyingMonster extends FlyingEntity implements Monster {
 	}
 
 	public function entityBaseTick($tickDiff = 1) {
-		Timings::$timerEntityBaseTick->startTiming();
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -141,8 +140,6 @@ abstract class FlyingMonster extends FlyingEntity implements Monster {
 		} else {
 			$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 		}
-
-		Timings::$timerEntityBaseTick->stopTiming();
 
 		return $hasUpdate;
 	}

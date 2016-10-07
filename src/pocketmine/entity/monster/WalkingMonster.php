@@ -150,7 +150,6 @@ abstract class WalkingMonster extends WalkingEntity implements Monster {
 	}
 
 	public function entityBaseTick($tickDiff = 1) {
-		Timings::$timerEntityBaseTick->startTiming();
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -175,8 +174,6 @@ abstract class WalkingMonster extends WalkingEntity implements Monster {
 				$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 			}
 		}
-
-		Timings::$timerEntityBaseTick->stopTiming();
 
 		return $hasUpdate;
 	}

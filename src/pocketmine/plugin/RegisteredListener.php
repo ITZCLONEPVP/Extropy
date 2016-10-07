@@ -92,9 +92,7 @@ class RegisteredListener {
 		if($event instanceof Cancellable and $event->isCancelled() and $this->isIgnoringCancelled()) {
 			return;
 		}
-		$this->timings->startTiming();
 		$this->executor->execute($this->listener, $event);
-		$this->timings->stopTiming();
 	}
 
 	/**

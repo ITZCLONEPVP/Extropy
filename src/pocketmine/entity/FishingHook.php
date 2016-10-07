@@ -75,11 +75,7 @@ class FishingHook extends Projectile {
 	}
 
 	public function onUpdate($currentTick) {
-		if($this->closed) {
-			return false;
-		}
-
-		$this->timings->startTiming();
+		if($this->closed) return false;
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -109,8 +105,6 @@ class FishingHook extends Projectile {
 			$this->coughtTimer--;
 			$this->fishBites();
 		}
-
-		$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}

@@ -64,12 +64,7 @@ class PrimedTNT extends Entity implements Explosive {
 	}
 
 	public function onUpdate($currentTick) {
-
-		if($this->closed) {
-			return false;
-		}
-
-		$this->timings->startTiming();
+		if($this->closed) return false;
 
 		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;

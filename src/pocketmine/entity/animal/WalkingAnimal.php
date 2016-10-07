@@ -70,7 +70,6 @@ abstract class WalkingAnimal extends WalkingEntity implements Animal {
 	}
 
 	public function entityBaseTick($tickDiff = 1) {
-		Timings::$timerEntityBaseTick->startTiming();
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -86,8 +85,6 @@ abstract class WalkingAnimal extends WalkingEntity implements Animal {
 		} else {
 			$this->setDataProperty(Entity::DATA_AIR, Entity::DATA_TYPE_SHORT, 300);
 		}
-
-		Timings::$timerEntityBaseTick->stopTiming();
 
 		return $hasUpdate;
 	}

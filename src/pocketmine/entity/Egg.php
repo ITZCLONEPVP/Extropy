@@ -40,11 +40,7 @@ class Egg extends Projectile {
 	protected $drag = 0.01;
 
 	public function onUpdate($currentTick) {
-		if($this->closed) {
-			return false;
-		}
-
-		$this->timings->startTiming();
+		if($this->closed) return false;
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -52,8 +48,6 @@ class Egg extends Projectile {
 			$this->kill();
 			$hasUpdate = true; //Chance to spawn chicken
 		}
-
-		$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}

@@ -181,7 +181,6 @@ class SimpleCommandMap implements CommandMap {
 			return false;
 		}
 
-		$target->timings->startTiming();
 		try {
 			$target->execute($sender, $sentCommandLabel, $args);
 		} catch(\Exception $e) {
@@ -191,7 +190,6 @@ class SimpleCommandMap implements CommandMap {
 				$logger->logException($e);
 			}
 		}
-		$target->timings->stopTiming();
 
 		return true;
 	}

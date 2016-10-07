@@ -68,8 +68,6 @@ class Arrow extends Projectile {
 			return false;
 		}
 
-		$this->timings->startTiming();
-
 		$hasUpdate = parent::onUpdate($currentTick);
 
 		if(!$this->hadCollision and $this->isCritical) {
@@ -90,8 +88,6 @@ class Arrow extends Projectile {
 			$this->kill();
 			$hasUpdate = true;
 		}
-
-		$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}

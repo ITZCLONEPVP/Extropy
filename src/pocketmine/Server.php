@@ -374,7 +374,7 @@ class Server {
 			$this->logger->info("Advanced cache enabled");
 		}
 
-		Level::$COMPRESSION_LEVEL = $this->getProperty("chunk-sending.compression-level", 8);
+		Level::$COMPRESSION_LEVEL = $this->getProperty("chunk-sending.compression-level", 7);
 
 		if(defined("pocketmine\\DEBUG") and \pocketmine\DEBUG >= 0) {
 			@\cli_set_process_title($this->getName() . " " . $this->getPocketMineVersion());
@@ -409,7 +409,7 @@ class Server {
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
 		$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
-		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+		$this->pluginManager->setUseTimings(false);
 		$this->pluginManager->registerInterface(PharPluginLoader::class);
 
 		\set_exception_handler([$this, "exceptionHandler"]);
@@ -1222,7 +1222,6 @@ class Server {
 	 * @throws \Exception
 	 */
 	public function dispatchCommand(CommandSender $sender, $commandLine) {
-		if(!$sender instanceof CommandSender) throw new ServerException("CommandSender is not valid");
 		if($this->commandMap->dispatch($sender, $commandLine)) return true;
 
 		if(!is_string($message = $this->getAdvancedProperty("messages.unknown-command", "Unknown command. Type \"/help\" for help."))) $message = "Unknown command. Type \"/help\" for help.";
@@ -2197,7 +2196,6 @@ class Server {
 
 	public function doAutoSave() {
 		if($this->getAutoSave()) {
-			//Timings::$worldSaveTimer->startTiming();
 			foreach($this->getOnlinePlayers() as $index => $player) {
 				if($player->isOnline()) {
 					$player->save();
@@ -2209,7 +2207,6 @@ class Server {
 			foreach($this->getLevels() as $level) {
 				$level->save(false);
 			}
-			//Timings::$worldSaveTimer->stopTiming();
 		}
 	}
 

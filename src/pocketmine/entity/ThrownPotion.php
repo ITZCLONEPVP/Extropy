@@ -65,8 +65,6 @@ class ThrownPotion extends Projectile {
 			return false;
 		}
 
-		$this->timings->startTiming();
-
 		$hasUpdate = parent::onUpdate($currentTick);
 
 		$this->age++;
@@ -81,8 +79,6 @@ class ThrownPotion extends Projectile {
 			$this->kill();
 			$this->close();
 		}
-
-		$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}

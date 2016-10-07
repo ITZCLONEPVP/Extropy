@@ -64,11 +64,7 @@ class FireBall extends Projectile {
 	}
 
 	public function onUpdate($currentTick) {
-		if($this->closed) {
-			return false;
-		}
-
-		$this->timings->startTiming();
+		if($this->closed) return false;
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -92,8 +88,6 @@ class FireBall extends Projectile {
 			$this->kill();
 			$hasUpdate = true;
 		}
-
-		$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}

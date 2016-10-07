@@ -181,11 +181,7 @@ class Furnace extends Tile implements InventoryHolder, Container, Nameable {
 	}
 
 	public function onUpdate() {
-		if($this->closed === true) {
-			return false;
-		}
-
-		$this->timings->startTiming();
+		if($this->closed === true) return false;
 
 		$ret = false;
 
@@ -258,8 +254,6 @@ class Furnace extends Tile implements InventoryHolder, Container, Nameable {
 		}
 
 		$this->lastUpdate = microtime(true);
-
-		$this->timings->stopTiming();
 
 		return $ret;
 	}

@@ -68,14 +68,11 @@ abstract class Projectile extends Entity {
 	}
 
 	public function onUpdate($currentTick) {
-		if($this->closed) {
-			return false;
-		}
+		if($this->closed) return false;
 
 		$tickDiff = $currentTick - $this->lastUpdate;
-		if($tickDiff <= 0 and !$this->justCreated) {
-			return true;
-		}
+		if($tickDiff <= 0 and !$this->justCreated) return true;
+
 		$this->lastUpdate = $currentTick;
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
@@ -105,9 +102,7 @@ abstract class Projectile extends Entity {
 				$axisalignedbb = $entity->boundingBox->grow(0.3, 0.3, 0.3);
 				$ob = $axisalignedbb->calculateIntercept($this, $moveVector);
 
-				if($ob === null) {
-					continue;
-				}
+				if($ob === null) continue;
 
 				$distance = $this->distanceSquared($ob->hitVector);
 
@@ -117,9 +112,7 @@ abstract class Projectile extends Entity {
 				}
 			}
 
-			if($nearEntity !== null) {
-				$movingObjectPosition = MovingObjectPosition::fromEntity($nearEntity);
-			}
+			if($nearEntity !== null) $movingObjectPosition = MovingObjectPosition::fromEntity($nearEntity);
 
 			if($movingObjectPosition !== null) {
 				if($movingObjectPosition->entityHit !== null) {
@@ -184,6 +177,11 @@ abstract class Projectile extends Entity {
 			}
 
 			$this->updateMovement();
+
+			if($this->y < 1) {
+				$this->kill();
+				$hasUpdate = true;
+			}
 
 		}
 
