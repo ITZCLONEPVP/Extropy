@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 use pocketmine\utils\Binary;
 use pocketmine\utils\UUID;
 
@@ -31,32 +30,22 @@ class LoginPacket extends DataPacket {
 
 	const NETWORK_ID = Info::LOGIN_PACKET;
 
+	const POCKET_EDITION = 0;
+
+	public $gameEdition;
 	public $username;
-
 	public $protocol1;
-
 	public $protocol2;
-
 	public $clientId;
-
 	public $clientUUID;
-
 	public $serverAddress;
-
 	public $clientSecret;
-
 	public $slim = false;
-
 	public $skinName;
-
 	public $chainsDataLength;
-
 	public $chains;
-
 	public $playerDataLength;
-
 	public $playerData;
-
 	public $isValidProtocol = true;
 
 	public function decode() {
@@ -64,12 +53,12 @@ class LoginPacket extends DataPacket {
 		$this->protocol1 = $this->getInt();
 		if(!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
-
 			return;
 		}
 
-		$bodyLength = $this->getInt();
-		$body = \zlib_decode($this->get($bodyLength));
+		$this->gameEdition = $this->getByte();
+
+		$body = zlib_decode($this->getString());
 		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
 

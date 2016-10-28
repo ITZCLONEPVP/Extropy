@@ -102,9 +102,7 @@ class ChunkMaker extends Worker {
 		$pk->data = $ordered;
 		$pk->encode();
 		if(!empty($pk->buffer)) {
-			$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-			$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->compressionLevel);
-			$result["payload"] = $ordered;
+			$result["payload"] = zlib_encode(Binary::writeUnsignedVarInt(strlen($pk->buffer)) . $pk->buffer, ZLIB_ENCODING_DEFLATE, $this->compressionLevel);
 		}
 
 		$this->externalQueue[] = serialize($result);

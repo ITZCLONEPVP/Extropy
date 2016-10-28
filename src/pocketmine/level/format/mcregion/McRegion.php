@@ -106,7 +106,7 @@ class McRegion extends BaseLevelProvider {
 			foreach($rawTiles as $tile) {
 				if($tile instanceof Spawnable) {
 					$nbt->setData($tile->getSpawnCompound());
-					$data ["tiles"] .= $nbt->write();
+					$data ["tiles"] .= $nbt->write(true);
 				}
 			}
 		}

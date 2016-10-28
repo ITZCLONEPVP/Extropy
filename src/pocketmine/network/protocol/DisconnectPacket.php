@@ -28,14 +28,17 @@ class DisconnectPacket extends DataPacket {
 
 	const NETWORK_ID = Info::DISCONNECT_PACKET;
 
+	public $hideDisconnectScreen = false;
 	public $message;
 
 	public function decode() {
+		$this->hideDisconnectScreen = $this->getBool();
 		$this->message = $this->getString();
 	}
 
 	public function encode() {
 		$this->reset();
+		$this->putBool($this->hideDisconnectScreen);
 		$this->putString($this->message);
 	}
 

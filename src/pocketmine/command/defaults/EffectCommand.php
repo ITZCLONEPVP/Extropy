@@ -28,6 +28,7 @@ use pocketmine\entity\InstantEffect;
 class EffectCommand extends VanillaCommand {
 
 	public function __construct($name) {
+		parent::__construct($name, "Applies the specified effect to a player", "/effect <player> <effect> [seconds] [amplifier] [hideParticles] OR /effect <player> clear");
 		$this->setPermission("pocketmine.command.effect");
 	}
 

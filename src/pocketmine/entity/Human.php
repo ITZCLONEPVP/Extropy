@@ -44,8 +44,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
 
-	const DATA_PLAYER_FLAGS = 16;
-	const DATA_PLAYER_BED_POSITION = 17;
+	const DATA_PLAYER_FLAGS = 27;
+	const DATA_PLAYER_BED_POSITION = 29;
 
 	/** @var float */
 	public $width = 0.6;
@@ -426,7 +426,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 		if(!isset($this->namedtag->foodTickTimer)) $this->namedtag->foodTickTimer = new IntTag("foodTickTimer", $this->foodTickTimer);
 		$this->foodTickTimer = $this->namedtag["foodTickTimer"];
 
-		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
+		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false, self::DATA_TYPE_BYTE);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
 	}
 

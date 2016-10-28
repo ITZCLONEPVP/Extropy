@@ -30,11 +30,11 @@ class LongTag extends NamedTag {
 		return NBT::TAG_Long;
 	}
 
-	public function read(NBT $nbt) {
-		$this->value = $nbt->endianness === 1 ? Binary::readLong($nbt->get(8)) : Binary::readLLong($nbt->get(8));
+	public function read(NBT $nbt, bool $network = false) {
+		$this->value = $nbt->getLong();
 	}
 
-	public function write(NBT $nbt) {
-		$nbt->buffer .= $nbt->endianness === 1 ? Binary::writeLong($this->value) : Binary::writeLLong($this->value);
+	public function write(NBT $nbt, bool $network = false) {
+		$nbt->putLong($this->value);
 	}
 }

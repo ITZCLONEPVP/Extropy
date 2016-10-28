@@ -465,68 +465,77 @@ class NBT {
 		return !isset($this->buffer{$this->offset});
 	}
 
-	public function readCompressed($buffer, $compression = ZLIB_ENCODING_GZIP) {
+	public function readCompressed($buffer) {
 		$this->read(zlib_decode($buffer));
 	}
 
-	public function read($buffer, $doMultiple = false) {
+	public function read($buffer, $doMultiple = false, bool $network = false) {
 		$this->offset = 0;
 		$this->buffer = $buffer;
-		$this->data = $this->readTag();
+		$this->data = $this->readTag($network);
 		if($doMultiple and $this->offset < strlen($this->buffer)) {
 			$this->data = [$this->data];
 			do {
-				$this->data[] = $this->readTag();
+				$this->data[] = $this->readTag($network);
 			} while($this->offset < strlen($this->buffer));
 		}
 		$this->buffer = "";
 	}
 
-	public function readTag() {
-		switch($this->getByte()) {
+	public function readNetworkCompressed($buffer) {
+		$this->read(zlib_decode($buffer), false, true);
+	}
+
+	public function readTag(bool $network = false) {
+		if($this->feof()) {
+			$tagType = -1;
+		} else {
+			$tagType = $this->getByte();
+		}
+		switch($tagType) {
 			case NBT::TAG_Byte:
-				$tag = new ByteTag($this->getString());
-				$tag->read($this);
+				$tag = new ByteTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Short:
-				$tag = new ShortTag($this->getString());
-				$tag->read($this);
+				$tag = new ShortTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Int:
-				$tag = new IntTag($this->getString());
-				$tag->read($this);
+				$tag = new IntTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Long:
-				$tag = new LongTag($this->getString());
-				$tag->read($this);
+				$tag = new LongTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Float:
-				$tag = new FloatTag($this->getString());
-				$tag->read($this);
+				$tag = new FloatTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Double:
-				$tag = new DoubleTag($this->getString());
-				$tag->read($this);
+				$tag = new DoubleTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_ByteArray:
-				$tag = new ByteArrayTag($this->getString());
-				$tag->read($this);
+				$tag = new ByteArrayTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_String:
-				$tag = new StringTag($this->getString());
-				$tag->read($this);
+				$tag = new StringTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Enum:
-				$tag = new ListTag($this->getString());
-				$tag->read($this);
+				$tag = new ListTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_Compound:
-				$tag = new CompoundTag($this->getString());
-				$tag->read($this);
+				$tag = new CompoundTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 			case NBT::TAG_IntArray:
-				$tag = new IntArrayTag($this->getString());
-				$tag->read($this);
+				$tag = new IntArrayTag($this->getString($network));
+				$tag->read($this, $network);
 				break;
 
 			case NBT::TAG_End: //No named tag
@@ -554,8 +563,9 @@ class NBT {
 		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
 	}
 
-	public function getString() {
-		return $this->get($this->endianness === 1 ? unpack("n", $this->get(2))[1] : unpack("v", $this->get(2))[1]);
+	public function getString(bool $network = false) {
+		$len = $network ? $this->getByte() : $this->getShort();
+		return $this->get($len);
 	}
 
 	public function writeCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7) {
@@ -566,20 +576,29 @@ class NBT {
 		return false;
 	}
 
+	public function writeNetworkCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7) {
+		if(($write = $this->write(true)) !== false){
+			return zlib_encode($write, $compression, $level);
+		}
+		return false;
+	}
+
 	/**
-	 * @return string|bool
+	 * @param bool $network
+	 *
+	 * @return bool|string
 	 */
-	public function write() {
+	public function write(bool $network = false) {
 		$this->offset = 0;
 		$this->buffer = "";
 
 		if($this->data instanceof CompoundTag) {
-			$this->writeTag($this->data);
+			$this->writeTag($this->data, $network);
 
 			return $this->buffer;
 		} elseif(is_array($this->data)) {
 			foreach($this->data as $tag) {
-				$this->writeTag($tag);
+				$this->writeTag($tag, $network);
 			}
 
 			return $this->buffer;
@@ -588,16 +607,20 @@ class NBT {
 		return false;
 	}
 
-	public function writeTag(Tag $tag) {
+	public function writeTag(Tag $tag, bool $network = false) {
 		$this->buffer .= chr($tag->getType());
 		if($tag instanceof NamedTag) {
-			$this->putString($tag->getName());
+			$this->putString($tag->getName(), $network);
 		}
-		$tag->write($this);
+		$tag->write($this, $network);
 	}
 
-	public function putString($v) {
-		$this->buffer .= $this->endianness === 1 ? pack("n", strlen($v)) : pack("v", strlen($v));
+	public function putString($v, bool $network = false) {
+		if($network) {
+			$this->putByte($v);
+		} else {
+			$this->putShort($v);
+		}
 		$this->buffer .= $v;
 	}
 
@@ -613,12 +636,19 @@ class NBT {
 		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("n", $v) : pack("v", $v);
 	}
 
-	public function getInt() {
+	public function getInt(bool $network = false) {
+		if($network) {
+			return Binary::readVarInt($this);
+		}
 		return $this->endianness === self::BIG_ENDIAN ? (PHP_INT_SIZE === 8 ? unpack("N", $this->get(4))[1] << 32 >> 32 : unpack("N", $this->get(4))[1]) : (PHP_INT_SIZE === 8 ? unpack("V", $this->get(4))[1] << 32 >> 32 : unpack("V", $this->get(4))[1]);
 	}
 
-	public function putInt($v) {
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
+	public function putInt($v, bool $network = false) {
+		if($network) {
+			$this->buffer .= Binary::writeVarInt($v);
+		} else {
+			$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
+		}
 	}
 
 	public function getLong() {

@@ -97,6 +97,8 @@ abstract class Living extends Entity implements Damageable {
 			return $this->deadTicks < 10;
 		}
 
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_BREATHING, !$this->isInsideOfWater());
+
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
 		if($this->dead !== true and $this->isInsideOfSolid()) {
@@ -107,7 +109,7 @@ abstract class Living extends Entity implements Damageable {
 
 		if($this->dead !== true and !$this->hasEffect(Effect::WATER_BREATHING) and $this->isInsideOfWater()) {
 			if($this instanceof WaterAnimal) {
-				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 400];
 			} else {
 				$hasUpdate = true;
 				$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
@@ -131,7 +133,7 @@ abstract class Living extends Entity implements Damageable {
 				}
 				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, $airTicks];
 			} else {
-				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 400];
 			}
 		}
 

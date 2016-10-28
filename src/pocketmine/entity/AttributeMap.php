@@ -31,6 +31,13 @@ class AttributeMap implements \ArrayAccess {
 	}
 
 	/**
+	 * @return Attribute[]
+	 */
+	public function getAll() {
+		return $this->attributes;
+	}
+
+	/**
 	 * @param int $id
 	 *
 	 * @return Attribute|null

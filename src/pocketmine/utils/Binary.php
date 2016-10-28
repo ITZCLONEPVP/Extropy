@@ -25,12 +25,16 @@
 namespace pocketmine\utils;
 
 use pocketmine\entity\Entity;
+use pocketmine\item\Item;
 
 class Binary {
 
 	const BIG_ENDIAN = 0x00;
 	const LITTLE_ENDIAN = 0x01;
 
+	private static function checkLength($str, $expected) {
+		assert(($len = strlen($str)) === $expected, "Expected $expected bytes, got $len");
+	}
 
 	/**
 	 * Reads a 3-byte big-endian number
@@ -40,6 +44,7 @@ class Binary {
 	 * @return mixed
 	 */
 	public static function readTriad($str) {
+		self::checkLength($str, 3);
 		return @unpack("N", "\x00" . $str)[1];
 	}
 
@@ -62,6 +67,7 @@ class Binary {
 	 * @return mixed
 	 */
 	public static function readLTriad($str) {
+		self::checkLength($str, 3);
 		return @unpack("V", $str . "\x00")[1];
 	}
 
@@ -84,43 +90,43 @@ class Binary {
 	 * @return string
 	 */
 	public static function writeMetadata(array $data) {
-		$m = "";
-		foreach($data as $bottom => $d) {
-			$m .= chr(($d[0] << 5) | ($bottom & 0x1F));
+		$stream = new BinaryStream();
+		$stream->putUnsignedVarInt(count($data));
+		foreach($data as $key => $d) {
+			$stream->putUnsignedVarInt($key);
+			$stream->putUnsignedVarInt($d[0]);
 			switch($d[0]) {
 				case Entity::DATA_TYPE_BYTE:
-					$m .= self::writeByte($d[1]);
+					$stream->putByte($d[1]);
 					break;
 				case Entity::DATA_TYPE_SHORT:
-					$m .= self::writeLShort($d[1]);
+					$stream->putLShort($d[1]);
 					break;
 				case Entity::DATA_TYPE_INT:
-					$m .= self::writeLInt($d[1]);
+					$stream->putVarInt($d[1]);
 					break;
 				case Entity::DATA_TYPE_FLOAT:
-					$m .= self::writeLFloat($d[1]);
+					$stream->putLFloat($d[1]);
 					break;
 				case Entity::DATA_TYPE_STRING:
-					$m .= self::writeLShort(strlen($d[1])) . $d[1];
+					$stream->putString($d[1]);
 					break;
 				case Entity::DATA_TYPE_SLOT:
-					$m .= self::writeLShort($d[1][0]);
-					$m .= self::writeByte($d[1][1]);
-					$m .= self::writeLShort($d[1][2]);
+					$stream->putSlot(Item::get($d[1][0], $d[1][2], $d[1][0]));
 					break;
 				case Entity::DATA_TYPE_POS:
-					$m .= self::writeLInt($d[1][0]);
-					$m .= self::writeLInt($d[1][1]);
-					$m .= self::writeLInt($d[1][2]);
+					$stream->putBlockCoords($d[1][0], $d[1][1], $d[1][2]);
 					break;
 				case Entity::DATA_TYPE_LONG:
-					$m .= self::writeLLong($d[1]);
+					$stream->putVarInt($d[1]);
+					break;
+				case Entity::DATA_TYPE_VECTOR3F:
+					$stream->putVector3f($d[1][0], $d[1][1], $d[1][2]);
 					break;
 			}
 		}
-		$m .= "\x7f";
 
-		return $m;
+		return $stream->getBuffer();
 	}
 
 	/**
@@ -155,6 +161,46 @@ class Binary {
 
 	public static function writeLLong($value) {
 		return strrev(self::writeLong($value));
+	}
+
+	public static function readVarInt($stream) {
+		$shift = PHP_INT_SIZE === 8 ? 63 : 31;
+		$raw = self::readUnsignedVarInt($stream);
+		$temp = ((($raw << $shift) >> $shift) ^ $raw) >> 1;
+		return $temp ^ ($raw & (1 << $shift));
+	}
+
+	public static function readUnsignedVarInt(BinaryStream $stream) {
+		$value = 0;
+		$i = 0;
+		do {
+			if($i > 63 ) throw new \InvalidArgumentException("Varint did't terminate after 10 bytes!");;
+			$value |= ((($b = $stream->getByte()) & 0x7f) << $i);
+			$i += 7;
+		} while($b & 0x80);
+
+		return $value;
+	}
+
+	public static function writeVarInt($v) {
+		return self::writeUnsignedVarInt(($v << 1) ^ ($v >> (PHP_INT_SIZE === 8 ? 63 : 31)));
+	}
+
+	public static function writeUnsignedVarInt($v) {
+		$buf = "";
+		$loops = 0;
+		do {
+			if($loops > 9) throw new \InvalidArgumentException("Varint cannot be longer than 10 bytes!");
+			$w = $v & 0x7f;
+			if(($v >> 7) !== 0) {
+				$w = $v | 0x80;
+			}
+			$buf .= self::writeByte($w);
+			$v = (($v >> 7) & (PHP_INT_MAX >> 6));
+			$loops++;
+		} while($v);
+
+		return $buf;
 	}
 
 	public static function writeLong($value) {
@@ -196,70 +242,58 @@ class Binary {
 	 * @return array
 	 */
 	public static function readMetadata($value, $types = false) {
-		$offset = 0;
-		$m = [];
-		$b = ord($value{$offset});
-		++$offset;
-		while($b !== 127 and isset($value{$offset})) {
-			$bottom = $b & 0x1F;
-			$type = $b >> 5;
+		$stream = new BinaryStream();
+		$stream->setBuffer($value);
+		$count = $stream->getUnsignedVarInt();
+		$data = [];
+		for($i = 0; $i < $count; $i++) {
+			$key = $stream->getUnsignedVarInt();
+			$type = $stream->getUnsignedVarInt();
+			$value = null;
 			switch($type) {
 				case Entity::DATA_TYPE_BYTE:
-					$r = self::readByte($value{$offset});
-					++$offset;
+					$value = $stream->getByte();
 					break;
 				case Entity::DATA_TYPE_SHORT:
-					$r = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
+					$value = $stream->getLShort(true);
 					break;
 				case Entity::DATA_TYPE_INT:
-					$r = self::readLInt(substr($value, $offset, 4));
-					$offset += 4;
+					$value = $stream->getVarInt();
 					break;
 				case Entity::DATA_TYPE_FLOAT:
-					$r = self::readLFloat(substr($value, $offset, 4));
-					$offset += 4;
+					$stream->getLFloat();
 					break;
 				case Entity::DATA_TYPE_STRING:
-					$len = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
-					$r = substr($value, $offset, $len);
-					$offset += $len;
+					$stream->getString();
 					break;
 				case Entity::DATA_TYPE_SLOT:
-					$r = [];
-					$r[] = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
-					$r[] = ord($value{$offset});
-					++$offset;
-					$r[] = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
+					$item = $stream->getSlot();
+					$value[0] = $item->getId();
+					$value[1] = $item->getCount();
+					$value[2] = $item->getDamage();
 					break;
 				case Entity::DATA_TYPE_POS:
-					$r = [];
-					for($i = 0; $i < 3; ++$i) {
-						$r[] = self::readLInt(substr($value, $offset, 4));
-						$offset += 4;
-					}
+					$value = [0, 0, 0];
+					$stream->getBlockCoords($value[0], $value[1], $value[2]);
 					break;
 				case Entity::DATA_TYPE_LONG:
-					$r = self::readLLong(substr($value, $offset, 4));
-					$offset += 8;
+					$value = $stream->getVarInt();
+					break;
+				case Entity::DATA_TYPE_VECTOR3F:
+					$value = [0.0, 0.0, 0.0];
+					$stream->getVector3f($value[0], $value[1], $value[2]);
 					break;
 				default:
-					return [];
-
+					$value = [];
 			}
-			if($types === true) {
-				$m[$bottom] = [$r, $type];
+			if($types) {
+				$data[$key] = [$value, $type];
 			} else {
-				$m[$bottom] = $r;
+				$data[$key] = $value;
 			}
-			$b = ord($value{$offset});
-			++$offset;
 		}
 
-		return $m;
+		return $data;
 	}
 
 	/**
@@ -271,6 +305,7 @@ class Binary {
 	 * @return int
 	 */
 	public static function readByte($c, $signed = true) {
+		self::checkLength($c, 1);
 		$b = ord($c{0});
 
 		if($signed) {
@@ -292,10 +327,12 @@ class Binary {
 	 * @return int
 	 */
 	public static function readLShort($str) {
+		self::checkLength($str, 2);
 		return @unpack("v", $str)[1];
 	}
 
 	public static function readLInt($str) {
+		self::checkLength($str, 4);
 		if(PHP_INT_SIZE === 8) {
 			return @unpack("V", $str)[1] << 32 >> 32;
 		} else {
@@ -304,6 +341,7 @@ class Binary {
 	}
 
 	public static function readLFloat($str) {
+		self::checkLength($str, 4);
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("f", strrev($str))[1] : @unpack("f", $str)[1];
 	}
 
@@ -312,6 +350,7 @@ class Binary {
 	}
 
 	public static function readLong($x) {
+		self::checkLength($x, 8);
 		if(PHP_INT_SIZE === 8) {
 			$int = @unpack("N*", $x);
 
@@ -339,6 +378,7 @@ class Binary {
 	 * @return int
 	 */
 	public static function readShort($str) {
+		self::checkLength($str, 2);
 		return @unpack("n", $str)[1];
 	}
 
@@ -372,6 +412,7 @@ class Binary {
 	 * @return int
 	 */
 	public static function readSignedShort($str) {
+		self::checkLength($str, 2);
 		if(PHP_INT_SIZE === 8) {
 			return @unpack("n", $str)[1] << 48 >> 48;
 		} else {
@@ -387,6 +428,7 @@ class Binary {
 	 * @return int
 	 */
 	public static function readSignedLShort($str) {
+		self::checkLength($str, 2);
 		if(PHP_INT_SIZE === 8) {
 			return @unpack("v", $str)[1] << 48 >> 48;
 		} else {
@@ -395,6 +437,7 @@ class Binary {
 	}
 
 	public static function readInt($str) {
+		self::checkLength($str, 4);
 		if(PHP_INT_SIZE === 8) {
 			return @unpack("N", $str)[1] << 32 >> 32;
 		} else {
@@ -407,6 +450,7 @@ class Binary {
 	}
 
 	public static function readFloat($str) {
+		self::checkLength($str, 4);
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("f", $str)[1] : @unpack("f", strrev($str))[1];
 	}
 
@@ -419,6 +463,7 @@ class Binary {
 	}
 
 	public static function readDouble($str) {
+		self::checkLength($str, 8);
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("d", $str)[1] : @unpack("d", strrev($str))[1];
 	}
 
@@ -427,6 +472,7 @@ class Binary {
 	}
 
 	public static function readLDouble($str) {
+		self::checkLength($str, 8);
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("d", strrev($str))[1] : @unpack("d", $str)[1];
 	}
 

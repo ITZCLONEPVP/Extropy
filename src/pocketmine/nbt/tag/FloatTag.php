@@ -31,11 +31,11 @@ class FloatTag extends NamedTag {
 		return NBT::TAG_Float;
 	}
 
-	public function read(NBT $nbt) {
-		$this->value = $nbt->endianness === 1 ? (ENDIANNESS === 0 ? unpack("f", $nbt->get(4))[1] : unpack("f", strrev($nbt->get(4)))[1]) : (ENDIANNESS === 0 ? unpack("f", strrev($nbt->get(4)))[1] : unpack("f", $nbt->get(4))[1]);
+	public function read(NBT $nbt, bool $network = false) {
+		$this->value = $nbt->getFloat();
 	}
 
-	public function write(NBT $nbt) {
-		$nbt->buffer .= $nbt->endianness === 1 ? (ENDIANNESS === 0 ? pack("f", $this->value) : strrev(pack("f", $this->value))) : (ENDIANNESS === 0 ? strrev(pack("f", $this->value)) : pack("f", $this->value));
+	public function write(NBT $nbt, bool $network = false) {
+		$nbt->buffer .= $nbt->putFloat($this->value);
 	}
 }

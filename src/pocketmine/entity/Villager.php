@@ -70,7 +70,7 @@ class Villager extends Creature implements NPC, Ageable {
 	}
 
 	public function isBaby() {
-		return $this->getDataFlag(self::DATA_AGEABLE_FLAGS, self::DATA_FLAG_BABY);
+		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_BABY);
 	}
 
 	protected function initEntity() {
@@ -88,4 +88,5 @@ class Villager extends Creature implements NPC, Ageable {
 	public function setProfession($profession) {
 		$this->namedtag->Profession = new IntTag("Profession", $profession);
 	}
+
 }

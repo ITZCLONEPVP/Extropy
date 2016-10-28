@@ -64,7 +64,9 @@ class BinaryStream extends \stdClass {
 
 			return "";
 		} elseif($len === true) {
-			return substr($this->buffer, $this->offset);
+			$str = substr($this->buffer, $this->offset);
+			$this->offset = strlen($this->buffer);
+			return $str;
 		}
 
 		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
@@ -154,6 +156,14 @@ class BinaryStream extends \stdClass {
 		$this->buffer .= $str;
 	}
 
+	public function getBool() : bool {
+		return (bool) $this->getByte();
+	}
+
+	public function putBool($v) {
+		$this->putByte((bool) $v);
+	}
+
 	public function getUUID() {
 		return UUID::fromBinary($this->get(16));
 	}
@@ -163,18 +173,17 @@ class BinaryStream extends \stdClass {
 	}
 
 	public function getSlot() {
-		$id = $this->getShort(true);
+		$id = $this->getVarInt(true);
 
 		if($id <= 0) {
 			return Item::get(0, 0, 0);
 		}
 
-		$cnt = $this->getByte();
-
-		$data = $this->getShort();
+		$auxValue = $this->getVarInt();
+		$data = $auxValue >> 8;
+		$cnt = $auxValue & 0xff;
 
 		$nbtLen = $this->getLShort();
-
 		$nbt = "";
 
 		if($nbtLen > 0) {
@@ -198,18 +207,17 @@ class BinaryStream extends \stdClass {
 
 	public function putSlot(Item $item) {
 		if($item->getId() === 0) {
-			$this->putShort(0);
+			$this->putVarInt(0);
 
 			return;
 		}
 
-		$this->putShort($item->getId());
-		$this->putByte($item->getCount());
+		$this->putVarInt($item->getId());
+		$this->putVarInt(($item->getDamage() << 8) | $item->getCount());
 		$this->putShort($item->getDamage() === null ? -1 : $item->getDamage());
 		$nbt = $item->getCompoundTag();
 		$this->putLShort(strlen($nbt));
 		$this->put($nbt);
-
 	}
 
 	public function putShort($v) {
@@ -225,11 +233,51 @@ class BinaryStream extends \stdClass {
 	}
 
 	public function getString() {
-		return $this->get($this->getShort());
+		return $this->get($this->getUnsignedVarInt());
 	}
 
 	public function putString($v) {
-		$this->putShort(strlen($v));
+		$this->putUnsignedVarInt(strlen($v));
 		$this->put($v);
+	}
+
+	public function getUnsignedVarInt() {
+		return Binary::readUnsignedVarInt($this);
+	}
+
+	public function putUnsignedVarInt($v) {
+		$this->put(Binary::writeUnsignedVarInt($v));
+	}
+
+	public function getVarInt() {
+		return Binary::readVarInt($this);
+	}
+
+	public function putVarInt($v) {
+		$this->put(Binary::writeVarInt($v));
+	}
+
+	public function getBlockCoords(&$x, &$y, &$z) {
+		$x = $this->getVarInt();
+		$y = $this->getByte();
+		$z = $this->getVarInt();
+	}
+
+	public function putBlockCoords($x, $y, $z) {
+		$this->putVarInt($x);
+		$this->putByte($y);
+		$this->putVarInt($z);
+	}
+
+	public function getVector3f(&$x, &$y, &$z) {
+		$x = $this->getLFloat();
+		$y = $this->getLFloat();
+		$z = $this->getLFloat();
+	}
+
+	public function putVector3f($x, $y, $z) {
+		$this->putLFloat($x);
+		$this->putLFloat($y);
+		$this->putLFloat($z);
 	}
 }

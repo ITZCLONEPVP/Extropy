@@ -76,19 +76,40 @@ abstract class Entity extends Location implements Metadatable {
 	const DATA_TYPE_STRING = 4;
 	const DATA_TYPE_SLOT = 5;
 	const DATA_TYPE_POS = 6;
-	//const DATA_TYPE_ROTATION = 8;
 	const DATA_TYPE_LONG = 7;
+	const DATA_TYPE_VECTOR3F = 8;
 
 	const DATA_FLAGS = 0;
-	const DATA_AIR = 1;
-	const DATA_NAMETAG = 2;
-	const DATA_SHOW_NAMETAG = 3;
-	const DATA_SILENT = 4;
-	const DATA_POTION_COLOR = 7;
-	const DATA_POTION_AMBIENT = 8;
-	const DATA_NO_AI = 15;
-	const DATA_LEAD_HOLDER = 23;
-	const DATA_LEAD = 24;
+	const DATA_VARINT = 1;
+	const DATA_COLOUR = 2;
+	const DATA_NAMETAG = 3;
+	const DATA_OWNER_EID = 4;
+	const DATA_AIR = 7;
+	const DATA_POTION_COLOR = 8;
+	const DATA_POTION_AMBIENT = 9;
+	// const DATA_BYTE = 27;
+	// const DATA_BED_POSITION = 28;
+
+	const DATA_LEAD_HOLDER_EID = 38;
+	const DATA_SCALE = 39;
+	const DATA_INTERACT_TAG = 40;
+	// const DATA_LONG = 41;
+	const DATA_URL_TAG = 43;
+	const DATA_MAX_AIR = 44;
+	const DATA_MARK_VARINT = 45;
+	// const DATA_BYTE = 46;
+	// const DATA_INT = 47;
+	// const DATA_INT = 48;
+	// const DATA_LONG = 49;
+	// const DATA_LONG = 50;
+	// const DATA_LONG = 51;
+	//const DATA_LONG = 52;
+	const DATA_BOUNDING_BOX_WIDTH = 53;
+	const DATA_BOUNDING_BOX_HEIGHT = 54;
+	// const DATA_VECTOR3F = 56
+	// const DATA_BYTE = 57
+	// const DATA_FLOAT = 58
+	// const DATA_FLOAT = 59;
 
 
 	const DATA_FLAG_ONFIRE = 0;
@@ -97,6 +118,33 @@ abstract class Entity extends Location implements Metadatable {
 	const DATA_FLAG_SPRINTING = 3;
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
+	const DATA_FLAG_TEMPTED = 6;
+	const DATA_FLAG_IN_LOVE = 7;
+	const DATA_FLAG_SADDLED = 8;
+	const DATA_FLAG_POWERED = 9;
+	const DATA_FLAG_IGNITED = 10;
+	const DATA_FLAG_BABY = 11;
+	const DATA_FLAG_CONVERTING = 12;
+	const DATA_FLAG_CRITICAL = 13;
+	const DATA_FLAG_CAN_SHOW_NAMETAG = 14;
+	const DATA_FLAG_ALWAYS_SHOW_NAMETAG = 15;
+	const DATA_FLAG_IMMOBILE = 16, DATA_FLAG_NO_AI = 16;
+	const DATA_FLAG_SILENT = 17;
+	const DATA_FLAG_WALL_CLIMBING = 18;
+	const DATA_FLAG_RESTING = 19;
+	const DATA_FLAG_SITTING = 20;
+	const DATA_FLAG_ANGRY = 21;
+	const DATA_FLAG_INTERESTED = 22;
+	const DATA_FLAG_CHARGED = 23;
+	const DATA_FLAG_TAMED = 24;
+	const DATA_FLAG_LEASHED = 25;
+	const DATA_FLAG_SHORN = 26;
+	const DATA_FLAG_FALL_FLYING = 27;
+	const DATA_FLG_ELDER = 28;
+	const DATA_FLAG_MOVING = 29;
+	const DATA_FLAG_BREATHING = 30;
+	const DATA_FLAG_CHESTED = 31;
+	const DATA_FLAG_STACKABLE = 32;
 
 
 	/** @var int */
@@ -247,7 +295,14 @@ abstract class Entity extends Location implements Metadatable {
 	protected $dataFlags = 0;
 
 	/** @var array */
-	protected $dataProperties = [self::DATA_FLAGS => [self::DATA_TYPE_BYTE, 0], self::DATA_AIR => [self::DATA_TYPE_SHORT, 300], self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""], self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1], self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0], self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0], self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1], self::DATA_LEAD => [self::DATA_TYPE_BYTE, 0],];
+	protected $dataProperties = [
+		self::DATA_FLAGS => [self::DATA_TYPE_LONG, 0],
+		self::DATA_AIR => [self::DATA_TYPE_SHORT, 400],
+		self::DATA_MAX_AIR => [self::DATA_TYPE_SHORT, 400],
+		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
+		self::DATA_LEAD_HOLDER_EID => [self::DATA_TYPE_LONG, -1],
+		self::DATA_SCALE => [self::DATA_TYPE_FLOAT, 1],
+	];
 
 	/** @var EntityDamageEvent */
 	protected $lastDamageCause = null;
@@ -577,9 +632,16 @@ abstract class Entity extends Location implements Metadatable {
 			$player = [$player];
 		}
 		$pk = new SetEntityDataPacket();
-		$pk->eid = $this->id;
+		$pk->eid = $this->getId();
 		$pk->metadata = $data === null ? $this->dataProperties : $data;
-		Server::broadcastPacket($player, $pk);
+		foreach($player as $p) {
+			if($p === $this) continue;
+			$p->dataPacket(clone $pk);
+		}
+		if($this instanceof Player) {
+			$pk->eid = 0;
+			$this->dataPacket($pk);
+		}
 	}
 
 	/**
@@ -622,11 +684,17 @@ abstract class Entity extends Location implements Metadatable {
 	 * @param bool $value
 	 */
 	public function setNameTagVisible($value = true) {
-		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CAN_SHOW_NAMETAG, $value);
 	}
 
-	protected function addAttributes() {
+	/**
+	 * @param bool $value
+	 */
+	public function setNameTagAlwaysVisible($value = true) {
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, $value);
 	}
+
+	protected function addAttributes() {}
 
 	/**
 	 * @param int|string $type
@@ -675,6 +743,14 @@ abstract class Entity extends Location implements Metadatable {
 		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING);
 	}
 
+	public function isImmobile() : bool {
+		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE);
+	}
+
+	public function setImmobile($value = true) : bool {
+		return $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE, $value);
+	}
+
 	/**
 	 * @param int $propertyId
 	 * @param int $id
@@ -690,11 +766,12 @@ abstract class Entity extends Location implements Metadatable {
 	}
 
 	/**
-	 * @param int $propertyId ;
-	 * @param int $id
+	 * @param $propertyId
+	 * @param $id
 	 * @param bool $value
+	 * @param int $type
 	 */
-	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_BYTE) {
+	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_LONG) {
 		if($this->getDataFlag($propertyId, $id) !== $value) {
 			$flags = (int)$this->getDataProperty($propertyId);
 			$flags ^= 1 << $id;
@@ -770,7 +847,14 @@ abstract class Entity extends Location implements Metadatable {
 	 * @return bool
 	 */
 	public function isNameTagVisible() {
-		return $this->getDataProperty(self::DATA_SHOW_NAMETAG) > 0;
+		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CAN_SHOW_NAMETAG);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isNameTagAlwaysVisible() {
+		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG);
 	}
 
 	public function isSpawned(Player $player) {
