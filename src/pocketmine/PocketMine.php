@@ -436,11 +436,7 @@ namespace pocketmine {
 		exit(1); //Exit with error
 	}
 
-	if(file_exists(\pocketmine\PATH . ".git/refs/heads/master")) { //Found Git information!
-		define("pocketmine\\GIT_COMMIT", strtolower(trim(file_get_contents(\pocketmine\PATH . ".git/refs/heads/master"))));
-	} else { //Unknown :(
-		define("pocketmine\\GIT_COMMIT", str_repeat("00", 20));
-	}
+	define("pocketmine\\GIT_COMMIT", str_repeat("00", 20));
 
 	@define("ENDIANNESS", (pack("d", 1) === "\77\360\0\0\0\0\0\0" ? Binary::BIG_ENDIAN : Binary::LITTLE_ENDIAN));
 	@define("INT32_MASK", is_int(0xffffffff) ? 0xffffffff : -1);
@@ -464,14 +460,14 @@ namespace pocketmine {
 		$thread->quit();
 	}
 
-	$killer = new ServerKiller(8);
-	$killer->start();
+//	$killer = new ServerKiller(8);
+//	$killer->start();
 
 	$logger->shutdown();
 	$logger->join();
 
 	echo Terminal::$FORMAT_RESET . "\n";
 
-	exit(0);
+	exit(1);
 
 }

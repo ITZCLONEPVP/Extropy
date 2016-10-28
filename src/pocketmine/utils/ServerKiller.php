@@ -25,7 +25,6 @@ use pocketmine\Thread;
 
 class ServerKiller extends Thread {
 
-
 	public $time;
 
 	public function __construct($time = 15) {
@@ -46,4 +45,5 @@ class ServerKiller extends Thread {
 	public function getThreadName() {
 		return "Server Killer";
 	}
+
 }

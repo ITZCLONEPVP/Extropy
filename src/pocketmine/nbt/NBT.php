@@ -39,10 +39,9 @@ use pocketmine\nbt\tag\NamedTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\Tag;
-use pocketmine\utils\Binary;
 
 #ifndef COMPILE
-
+use pocketmine\utils\Binary;
 #endif
 
 
@@ -111,8 +110,15 @@ class NBT {
 		if(!isset($tag->id) or !isset($tag->Count)) {
 			return Item::get(0);
 		}
-
-		$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
+		if($tag->id instanceof ShortTag) {
+			$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
+		} elseif($tag->id instanceof StringTag) { // PC Item entity save format
+			$item = Item::fromString($tag->id->getValue());
+			$item->setDamage(!isset($tag->Damage) ? 0 : $tag->Damage->getValue());
+			$item->setCount($tag->Count->getValue());
+		} else {
+			throw new \InvalidArgumentException("Item ID must be an instance of StringTag or ShortTag, " . get_class($tag->id) . " given");
+		}
 
 		if(isset($tag->tag) and $tag->tag instanceof CompoundTag) {
 			$item->setNamedTag($tag->tag);
@@ -268,7 +274,7 @@ class NBT {
 			if($c === ":") {
 				++$offset;
 				break;
-			} elseif($c !== " " and $c !== "\r" and $c !== "\n" and $c !== "\t") {
+			} elseif($c !== " " and $c !== "\r" and $c !== "\n" and $c !== "\t" and $c !== "\"") {
 				$key .= $c;
 			}
 		}

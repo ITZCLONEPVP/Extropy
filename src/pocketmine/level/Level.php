@@ -573,6 +573,7 @@ class Level implements ChunkManager, Metadatable {
 
 		$this->provider->close();
 		$this->provider = null;
+		$this->chunkMaker->shutdown();
 		$this->blockMetadata = null;
 		$this->blockCache = [];
 		$this->temporalPosition = null;
@@ -1369,13 +1370,6 @@ class Level implements ChunkManager, Metadatable {
 				$ev->setCancelled();
 			}
 
-			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1) {
-				$t = new Vector2($target->x, $target->z);
-				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-				if($t->distance($s) <= $distance) { //set it to cancelled so plugins can bypass this
-					$ev->setCancelled();
-				}
-			}
 			$this->server->getPluginManager()->callEvent($ev);
 			if($ev->isCancelled()) {
 				return false;
@@ -1771,13 +1765,6 @@ class Level implements ChunkManager, Metadatable {
 
 		if($player instanceof Player) {
 			$ev = new PlayerInteractEvent($player, $item, $target, $face);
-			//			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
-			//				$t = new Vector2($target->x, $target->z);
-			//				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-			//				if($t->distance($s) <= $distance){ //set it to cancelled so plugins can bypass this
-			//					$ev->setCancelled();
-			//				}
-			//			}
 			$this->server->getPluginManager()->callEvent($ev);
 			if($player->isSpectator()) {
 				$ev->setCancelled(true);
@@ -1811,7 +1798,11 @@ class Level implements ChunkManager, Metadatable {
 			return false;
 		}
 
-		if(!($block->canBeReplaced() === true or ($hand->getId() === Item::SLAB and $block->getId() === Item::SLAB))) {
+		if($face <= 1 and $hand->getId() === Item::WOOD_SLAB and $target->getId() === Item::WOOD_SLAB) {
+			$block = $target;
+		}
+
+		if(!($block->canBeReplaced() === true or ($hand->getId() === Item::WOOD_SLAB and $block->getId() === Item::WOOD_SLAB) or ($hand->getId() === Item::SLAB and $block->getId() === Item::SLAB))) {
 			return false;
 		}
 
@@ -1850,13 +1841,6 @@ class Level implements ChunkManager, Metadatable {
 				return false;
 			}
 			$ev = new BlockPlaceEvent($player, $hand, $block, $target, $item);
-			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1) {
-				$t = new Vector2($target->x, $target->z);
-				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-				if($t->distance($s) <= $distance) { //set it to cancelled so plugins can bypass this
-					$ev->setCancelled();
-				}
-			}
 			$this->server->getPluginManager()->callEvent($ev);
 			if($ev->isCancelled()) {
 				return false;

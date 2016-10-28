@@ -131,13 +131,6 @@ LICENSE;
 		$config->set("gamemode", $gamemode);
 		echo "[?] " . $this->lang->max_players . " (" . self::DEFAULT_PLAYERS . "): ";
 		$config->set("max-players", (int)$this->getInput(self::DEFAULT_PLAYERS));
-		echo "[*] " . $this->lang->spawn_protection_info . "\n";
-		echo "[?] " . $this->lang->spawn_protection . " (Y/n): ";
-		if(strtolower($this->getInput("y")) == "n") {
-			$config->set("spawn-protection", -1);
-		} else {
-			$config->set("spawn-protection", 16);
-		}
 		$config->save();
 	}
 

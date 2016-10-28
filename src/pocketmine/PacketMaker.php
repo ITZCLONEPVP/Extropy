@@ -38,7 +38,6 @@ class PacketMaker extends Worker {
 		ini_set("display_startup_errors", 1);
 
 		set_error_handler([$this, "errorHandler"], E_ALL);
-		register_shutdown_function([$this, "shutdownHandler"]);
 		$this->tickProcessor();
 	}
 
@@ -176,7 +175,6 @@ class PacketMaker extends Worker {
 		$this->shutdown = true;
 	}
 
-
 	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null) {
 		$errorConversion = [E_ERROR => "E_ERROR", E_WARNING => "E_WARNING", E_PARSE => "E_PARSE", E_NOTICE => "E_NOTICE", E_CORE_ERROR => "E_CORE_ERROR", E_CORE_WARNING => "E_CORE_WARNING", E_COMPILE_ERROR => "E_COMPILE_ERROR", E_COMPILE_WARNING => "E_COMPILE_WARNING", E_USER_ERROR => "E_USER_ERROR", E_USER_WARNING => "E_USER_WARNING", E_USER_NOTICE => "E_USER_NOTICE", E_STRICT => "E_STRICT", E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR", E_DEPRECATED => "E_DEPRECATED", E_USER_DEPRECATED => "E_USER_DEPRECATED",];
 		$errno = isset($errorConversion[$errno]) ? $errorConversion[$errno] : $errno;
@@ -184,11 +182,9 @@ class PacketMaker extends Worker {
 			$errstr = substr($errstr, 0, $pos);
 		}
 
-		//var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");	
 		@file_put_contents('logs/' . date('Y.m.d') . '_debug.log', "An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline\n", FILE_APPEND | LOCK_EX);
 
 		foreach(($trace = $this->getTrace($trace === null ? 3 : 0, $trace)) as $i => $line) {
-			//var_dump($line);			
 			@file_put_contents('logs/' . date('Y.m.d') . '_debug.log', $line . "\n", FILE_APPEND | LOCK_EX);
 		}
 
@@ -223,12 +219,6 @@ class PacketMaker extends Worker {
 		}
 
 		return $messages;
-	}
-
-	public function shutdownHandler() {
-		if($this->shutdown !== true) {
-			var_dump("Packet thread crashed!");
-		}
 	}
 
 }

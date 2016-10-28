@@ -21,16 +21,10 @@
 
 namespace pocketmine\network\protocol;
 
-	#include <rules/DataPacket.h>
-
-	#ifndef COMPILE
-
-#endif
-
+#include <rules/DataPacket.h>
 
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
-
 
 abstract class DataPacket extends BinaryStream {
 

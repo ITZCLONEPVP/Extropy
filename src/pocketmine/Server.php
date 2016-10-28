@@ -314,7 +314,7 @@ class Server {
 			@file_put_contents($this->dataPath . "pocketmine.yml", $content);
 		}
 		$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
-		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, ["motd" => "Extropy Server", "server-port" => 19132, "memory-limit" => "256M", "white-list" => false, "spawn-protection" => 16, "max-players" => 20, "allow-flight" => false, "spawn-animals" => true, "animals-limit" => 0, "spawn-mobs" => true, "mobs-limit" => 0, "gamemode" => 0, "force-gamemode" => false, "hardcore" => false, "pvp" => true, "difficulty" => 1, "generator-settings" => "", "level-name" => "world", "level-seed" => "", "level-type" => "DEFAULT", "enable-query" => true, "enable-rcon" => false, "rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10), "auto-save" => true, "auto-generate" => false]);
+		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, ["motd" => "Extropy Server", "server-port" => 19132, "memory-limit" => "256M", "white-list" => false, "max-players" => 20, "allow-flight" => false, "spawn-animals" => true, "animals-limit" => 0, "spawn-mobs" => true, "mobs-limit" => 0, "gamemode" => 0, "force-gamemode" => false, "hardcore" => false, "pvp" => true, "difficulty" => 1, "generator-settings" => "", "level-name" => "world", "level-seed" => "", "level-type" => "DEFAULT", "enable-query" => true, "enable-rcon" => false, "rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10), "auto-save" => true, "auto-generate" => false]);
 
 		ServerScheduler::$WORKERS = $this->getProperty("settings.async-workers", 8);
 
@@ -989,6 +989,8 @@ class Server {
 
 			$this->properties->save();
 
+			$this->packetMaker->shutdown();
+
 			$this->console->shutdown();
 			$this->console->notify();
 
@@ -1009,7 +1011,7 @@ class Server {
 	public function shutdown() {
 		$this->pluginManager->callEvent(new ServerShutdownEvent(time()));
 		$this->isRunning = false;
-		\gc_collect_cycles();
+		gc_collect_cycles();
 	}
 
 	/**
@@ -1084,8 +1086,6 @@ class Server {
 
 		$this->tickProcessor();
 		$this->forceShutdown();
-
-		\gc_collect_cycles();
 	}
 
 	/**
@@ -1445,9 +1445,11 @@ class Server {
 
 	/**
 	 * @return int
+	 *
+	 * @deprecated true
 	 */
 	public function getSpawnRadius() {
-		return $this->getConfigInt("spawn-protection", 16);
+		return 0;
 	}
 
 	/**
