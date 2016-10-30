@@ -1706,12 +1706,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$nbt["Level"] = $this->level->getName();
 				$nbt["Pos"][0] = $this->level->getSpawnLocation()->x;
 				$nbt["Pos"][1] = $this->level->getSpawnLocation()->y + 5;
+				$nbt["Pos"][2] = $this->level->getSpawnLocation()->z;
 
 				if(!($nbt instanceof CompoundTag)) {
 					$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
-
 					return;
 				}
+
+				$pk = new PlayStatusPacket();
+				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+				$this->dataPacket($pk);
 
 				$this->dataPacket(new ResourcePacksInfoPacket());
 
