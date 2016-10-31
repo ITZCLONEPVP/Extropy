@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class ReplaceSelectedItemPacket extends DataPacket {
 
 	const NETWORK_ID = Info::REPLACE_SELECTED_ITEM_PACKET;
@@ -31,7 +30,6 @@ class ReplaceSelectedItemPacket extends DataPacket {
 	public $item;
 
 	public function decode() {
-
 	}
 
 	public function encode() {

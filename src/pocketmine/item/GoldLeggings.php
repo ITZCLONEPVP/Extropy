@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class GoldLeggings extends Armor {
 
 	const SLOT_NUMBER = 2;

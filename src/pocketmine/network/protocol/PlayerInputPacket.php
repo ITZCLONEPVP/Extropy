@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class PlayerInputPacket extends DataPacket {
 
 	const NETWORK_ID = Info::PLAYER_INPUT_PACKET;
@@ -44,7 +43,6 @@ class PlayerInputPacket extends DataPacket {
 	}
 
 	public function encode() {
-
 	}
 
 }

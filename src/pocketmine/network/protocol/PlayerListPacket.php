@@ -22,8 +22,6 @@
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
-use pocketmine\utils\TextFormat;
-
 
 class PlayerListPacket extends DataPacket {
 
@@ -32,7 +30,7 @@ class PlayerListPacket extends DataPacket {
 	const TYPE_ADD = 0;
 	const TYPE_REMOVE = 1;
 
-	//REMOVE: UUID, ADD: UUID, entity id, name, skinName, skin
+	//REMOVE: UUID, ADD: UUID, entity id, name, skinId, skin
 	/** @var array[] */
 	public $entries = [];
 
@@ -45,7 +43,6 @@ class PlayerListPacket extends DataPacket {
 	}
 
 	public function decode() {
-
 	}
 
 	public function encode() {
@@ -55,8 +52,8 @@ class PlayerListPacket extends DataPacket {
 		foreach($this->entries as $d) {
 			if($this->type === self::TYPE_ADD) {
 				$this->putUUID($d[0]);
-				$this->putLong($d[1]);
-				$this->putString(TextFormat::clean($d[2]));
+				$this->putEntityId($d[1]);
+				$this->putString($d[2]);
 				$this->putString($d[3]);
 				$this->putString($d[4]);
 			} else {

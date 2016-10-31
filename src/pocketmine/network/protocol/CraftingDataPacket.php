@@ -21,14 +21,13 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
-
-
 use pocketmine\inventory\FurnaceRecipe;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\enchantment\EnchantmentList;
 use pocketmine\utils\BinaryStream;
+
+#include <rules/DataPacket.h>
 
 class CraftingDataPacket extends DataPacket {
 
@@ -68,7 +67,6 @@ class CraftingDataPacket extends DataPacket {
 	}
 
 	public function decode() {
-
 	}
 
 	public function encode() {
@@ -84,7 +82,6 @@ class CraftingDataPacket extends DataPacket {
 			} else {
 				$this->putVarInt(-1);
 			}
-
 			$writer->reset();
 		}
 
@@ -123,8 +120,8 @@ class CraftingDataPacket extends DataPacket {
 		$stream->putVarInt($recipe->getWidth());
 		$stream->putVarInt($recipe->getHeight());
 
-		for($z = 0; $z < $recipe->getWidth(); ++$z) {
-			for($x = 0; $x < $recipe->getHeight(); ++$x) {
+		for($z = 0; $z < $recipe->getHeight(); ++$z) {
+			for($x = 0; $x < $recipe->getWidth(); ++$x) {
 				$stream->putSlot($recipe->getIngredient($x, $z));
 			}
 		}
@@ -138,9 +135,9 @@ class CraftingDataPacket extends DataPacket {
 	}
 
 	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, BinaryStream $stream) {
-		if($recipe->getInput()->getDamage() !== 0) { //Data recipe
-			$stream->putVarInt($recipe->getInput()->getDamage());
+		if($recipe->getInput()->getDamage() !== null) { //Data recipe
 			$stream->putVarInt($recipe->getInput()->getId());
+			$stream->putVarInt($recipe->getInput()->getDamage());
 			$stream->putSlot($recipe->getResult());
 
 			return CraftingDataPacket::ENTRY_FURNACE_DATA;
@@ -153,6 +150,7 @@ class CraftingDataPacket extends DataPacket {
 	}
 
 	private static function writeEnchantList(EnchantmentList $list, BinaryStream $stream) {
+		//TODO: check this works on 0.16 (cannot currently test)
 		$stream->putByte($list->getSize());
 		for($i = 0; $i < $list->getSize(); ++$i) {
 			$entry = $list->getSlot($i);

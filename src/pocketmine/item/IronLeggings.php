@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class IronLeggings extends Armor {
 
 	const SLOT_NUMBER = 2;

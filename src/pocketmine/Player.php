@@ -100,7 +100,7 @@ use pocketmine\network\protocol\AdventureSettingsPacket;
 use pocketmine\network\protocol\AnimatePacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\BatchPacket;
-use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
+use pocketmine\network\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\protocol\ContainerClosePacket;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\DataPacket;
@@ -113,6 +113,7 @@ use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\RespawnPacket;
+use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\protocol\SetSpawnPositionPacket;
@@ -131,6 +132,7 @@ use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\UUID;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -686,7 +688,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 			if(!$this->checkTeleportPosition()) $this->forceMovement = $oldPos;
 
-
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
 			$this->newPosition = null;
@@ -806,7 +807,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->action = 3; //Wake up
 			$this->dataPacket($pk);
 		}
-
 	}
 
 	public function onUpdate($currentTick) {
@@ -1131,7 +1131,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->x = $newPos->x;
 			$this->y = $newPos->y;
 			$this->z = $newPos->z;
-
 			/*
 
 			$diffX = $this->x - $newPos->x;
@@ -1233,7 +1232,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$this->checkNearEntities($tickDiff);
 			}
 			$this->speed = $from->subtract($to);
-
 		} elseif($distanceSquared == 0) {
 			$this->speed = new Vector3(0, 0, 0);
 			$this->setMoving(false);
@@ -1604,20 +1602,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				 */
 				if($this->loggedIn) break;
 
-				if(!$packet->isValidProtocol) {
+				if(!in_array($packet->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)) {
 					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GOLD . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
 					break;
 				}
 
-				$this->setNameTag($this->username = $this->displayName = TextFormat::clean($packet->username));
+				$this->username = $this->displayName = TextFormat::clean($packet->username);
 				$this->iusername = strtolower($this->username);
 
 				$this->randomClientId = $packet->clientId;
-				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
-				$this->uuid = $packet->clientUUID;
+				$this->loginData = ["clientId" => $packet->clientUUID, "loginData" => null];
+				$this->uuid = UUID::fromString($packet->clientUUID);
 				$this->rawUUID = $this->uuid->toBinary();
-				$this->clientSecret = $packet->clientSecret;
-				$this->protocol = $packet->protocol1;
+				$this->clientSecret = $packet->clientId;
+				$this->protocol = $packet->protocol;
 				$valid = true;
 				$len = strlen($packet->username);
 				if($len > 16 or $len < 3) {
@@ -1645,10 +1643,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 				if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()) {
 					$this->close("", "Server is Full");
-					break;
+
+					return;
 				}
 
-				$this->setSkin($packet->skin, $packet->skinName);
+				$this->setSkin($packet->skin, $packet->skinId);
 
 				$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
 				if($ev->isCancelled()) {
@@ -1687,6 +1686,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						return;
 					}
 				}
+
+				$this->setNameTag($this->getDisplayName());
 
 				$nbt = $this->server->getOfflinePlayerData($this->username);
 				if(!isset($nbt->NameTag)) {
@@ -1758,7 +1759,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$pk->spawnX = $spawnPosition->getFloorX();
 				$pk->spawnY = $spawnPosition->getFloorY();
 				$pk->spawnZ = $spawnPosition->getFloorZ();
-				$pk->hasAchievementsDisabled = 1;
+				$pk->hasAchievementsDisabled = 0;
 				$pk->dayCycleStopTime = -1;
 				$pk->eduMode = 0;
 				$pk->rainLevel = 0;
@@ -1778,8 +1779,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 				$this->server->getLogger()->info(TextFormat::DARK_AQUA . $this->username . TextFormat::DARK_GRAY . "/" . TextFormat::GRAY . $this->ip . TextFormat::DARK_AQUA . " connected");
 
-				$this->sendCommandData();
-
 				if($this->gamemode === Player::SPECTATOR) {
 					$pk = new ContainerSetContentPacket();
 					$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
@@ -1793,8 +1792,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->dataPacket($pk);
 				}
 
+				$this->sendCommandData();
+
 				$this->server->sendFullPlayerListData($this);
+
 				$this->server->getCraftingManager()->sendRecipeList($this);
+
+				$pk = new SetEntityDataPacket();
+				$pk->eid = 0;
+				$pk->metadata = $this->dataProperties;
+				$this->dataPacket($pk);
+
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
 				$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
@@ -1915,7 +1923,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
 					if($blockVector->distance($this) > 10 or ($this->isCreative() and $this->isAdventure())) {
-
 					} elseif($this->isCreative()) {
 						$item = $this->inventory->getItemInHand();
 						if($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true) {
@@ -2250,7 +2257,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 				$vector = new Vector3($packet->x, $packet->y, $packet->z);
 
-
 				if($this->isCreative()) {
 					$item = $this->inventory->getItemInHand();
 				} else {
@@ -2521,7 +2527,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 				$canCraft = true;
 
-
 				if($recipe instanceof ShapedRecipe) {
 					for($x = 0; $x < 3 and $canCraft; ++$x) {
 						for($y = 0; $y < 3; ++$y) {
@@ -2688,7 +2693,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					break;
 				}
 
-
 				if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 0.8)) {
 					if($this->currentTransaction !== null) {
 						foreach($this->currentTransaction->getInventories() as $inventory) {
@@ -2708,7 +2712,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->currentTransaction = null;
 				}
 				break;
-			case ProtocolInfo::TILE_ENTITY_DATA_PACKET:
+			case ProtocolInfo::BLOCK_ENTITY_DATA_PACKET:
 				if($this->spawned === false or $this->blocked === true or $this->dead === true) {
 					break;
 				}
@@ -2745,7 +2749,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
 				$this->viewDistance = $packet->radius ** 2;
-				$pk = new ChunkRadiusUpdatePacket();
+				$pk = new ChunkRadiusUpdatedPacket();
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
 				break;
@@ -3054,7 +3058,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 
 			default:
-
 		}
 
 		if($this->dead) {
@@ -3197,7 +3200,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	protected function checkBlockCollision() {
-
 	}
 
 }

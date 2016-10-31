@@ -29,7 +29,6 @@ class Gravel extends Fallable {
 	protected $id = self::GRAVEL;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

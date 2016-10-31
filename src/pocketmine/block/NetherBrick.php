@@ -29,7 +29,6 @@ class NetherBrick extends Solid {
 	protected $id = self::NETHER_BRICKS;
 
 	public function __construct() {
-
 	}
 
 	public function getToolType() {

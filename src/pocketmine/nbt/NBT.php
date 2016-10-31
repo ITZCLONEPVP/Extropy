@@ -39,11 +39,11 @@ use pocketmine\nbt\tag\NamedTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\Tag;
+use pocketmine\utils\Binary;
 
 #ifndef COMPILE
-use pocketmine\utils\Binary;
-#endif
 
+#endif
 
 #include <rules/NBT.h>
 
@@ -391,7 +391,6 @@ class NBT {
 
 	private static function parseList($str, &$offset = 0) {
 		$len = strlen($str);
-
 
 		$key = 0;
 		$value = null;

@@ -32,7 +32,6 @@ class AvailableCommandsPacket extends DataPacket {
 	public $unknown;
 
 	public function decode() {
-
 	}
 
 	public function encode() {

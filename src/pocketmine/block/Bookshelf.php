@@ -21,7 +21,6 @@
 
 namespace pocketmine\block;
 
-
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
@@ -30,7 +29,6 @@ class Bookshelf extends Solid {
 	protected $id = self::BOOKSHELF;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

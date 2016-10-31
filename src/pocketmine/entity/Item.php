@@ -115,7 +115,6 @@ class Item extends Entity {
 					}
 				}
 			}
-
 		}
 
 		return $hasUpdate or !$this->onGround or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0;
@@ -129,7 +128,6 @@ class Item extends Entity {
 		$diffMotionX = abs($this->motionX - $this->lastMotionX);
 		$diffMotionY = abs($this->motionY - $this->lastMotionY);
 		$diffMotionZ = abs($this->motionZ - $this->lastMotionZ);
-
 
 		if($diffPositionX > 0.2 || $diffPositionZ > 0.2 || ($diffPositionX > 0.01 && $diffPositionZ > 0.01 && $diffPositionY > 0.2)) {
 			$this->lastX = $this->x;
@@ -222,8 +220,6 @@ class Item extends Entity {
 		$pk->item = $this->getItem();
 		$player->dataPacket($pk);
 
-		//		$this->sendData($player);
-
 		parent::spawnTo($player);
 	}
 
@@ -252,7 +248,6 @@ class Item extends Entity {
 			$this->thrower = $this->namedtag["Thrower"];
 		}
 		$this->item = NBT::getItemHelper($this->namedtag->Item);
-
 
 		$this->server->getPluginManager()->callEvent(new ItemSpawnEvent($this));
 	}

@@ -30,7 +30,6 @@ class Dirt extends Solid {
 	protected $id = self::DIRT;
 
 	public function __construct() {
-
 	}
 
 	public function canBeActivated() : bool {

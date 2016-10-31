@@ -21,7 +21,6 @@
 
 namespace pocketmine\block;
 
-
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
@@ -287,7 +286,6 @@ abstract class Liquid extends Transparent {
 			}
 
 			$this->checkForHarden();
-
 		}
 	}
 

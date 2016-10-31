@@ -21,7 +21,6 @@
 
 namespace pocketmine\entity;
 
-
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\ExplosionPrimeEvent;
 use pocketmine\level\Explosion;
@@ -51,7 +50,6 @@ class PrimedTNT extends Entity implements Explosive {
 
 
 	public function attack($damage, EntityDamageEvent $source) {
-
 	}
 
 	public function canCollideWith(Entity $entity) {
@@ -97,9 +95,7 @@ class PrimedTNT extends Entity implements Explosive {
 				$this->kill();
 				$this->explode();
 			}
-
 		}
-
 
 		return $hasUpdate or $this->fuse >= 0 or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0;
 	}
@@ -126,7 +122,7 @@ class PrimedTNT extends Entity implements Explosive {
 		$pk->speedX = $this->motionX;
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
-		//		$pk->metadata = $this->dataProperties;
+		$pk->metadata = $this->dataProperties;
 		$player->dataPacket($pk);
 
 		parent::spawnTo($player);

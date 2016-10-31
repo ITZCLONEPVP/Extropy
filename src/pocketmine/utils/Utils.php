@@ -226,7 +226,6 @@ class Utils {
 		}
 
 		return Utils::$ip;
-
 	}
 
 	/**

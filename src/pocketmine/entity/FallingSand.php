@@ -21,7 +21,6 @@
 
 namespace pocketmine\entity;
 
-
 use pocketmine\block\Block;
 use pocketmine\block\Liquid;
 use pocketmine\event\entity\EntityBlockChangeEvent;
@@ -60,7 +59,6 @@ class FallingSand extends Entity {
 	}
 
 	public function attack($damage, EntityDamageEvent $source) {
-
 	}
 
 	public function onUpdate($currentTick) {
@@ -80,7 +78,6 @@ class FallingSand extends Entity {
 					return true;
 				}
 				$this->level->setBlock($pos, Block::get(0), true);
-
 			}
 
 			$this->motionY -= $this->gravity;
@@ -146,7 +143,7 @@ class FallingSand extends Entity {
 		$pk->speedZ = $this->motionZ;
 		$pk->yaw = $this->yaw;
 		$pk->pitch = $this->pitch;
-		//		$pk->metadata = $this->dataProperties;
+		$pk->metadata = $this->dataProperties;
 		$player->dataPacket($pk);
 
 		parent::spawnTo($player);

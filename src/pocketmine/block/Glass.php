@@ -28,7 +28,6 @@ class Glass extends Transparent {
 	protected $id = self::GLASS;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

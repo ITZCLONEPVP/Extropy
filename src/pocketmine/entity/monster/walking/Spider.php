@@ -113,7 +113,6 @@ class Spider extends WalkingMonster {
 		$be = new Vector2($this->x + $dx, $this->z + $dz);
 		$af = new Vector2($this->x, $this->z);
 
-
 		if($be->x != $af->x || $be->y != $af->y) {
 			$x = 0;
 			$z = 0;

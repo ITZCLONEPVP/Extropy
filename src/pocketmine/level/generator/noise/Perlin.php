@@ -52,7 +52,6 @@ class Perlin extends Noise {
 			$this->perm[$pos] = $old;
 			$this->perm[$i + 256] = $this->perm[$i];
 		}
-
 	}
 
 	public function getNoise2D($x, $y) {
@@ -109,7 +108,6 @@ class Perlin extends Noise {
 		$xLerp21 = $AA2 + $fX * ($BA2 - $AA2);
 
 		return $zLerp1 + $fZ * ($xLerp21 + $fY * ($AB2 + $fX * ($BB2 - $AB2) - $xLerp21) - $zLerp1);
-
 		/*
 		return self::lerp(
 			$fZ,

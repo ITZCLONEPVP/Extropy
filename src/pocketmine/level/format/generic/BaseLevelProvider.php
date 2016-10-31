@@ -97,7 +97,6 @@ abstract class BaseLevelProvider implements LevelProvider {
 	}
 
 	public function doGarbageCollection() {
-
 	}
 
 	/**

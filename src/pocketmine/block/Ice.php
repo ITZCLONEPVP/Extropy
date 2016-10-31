@@ -29,7 +29,6 @@ class Ice extends Transparent {
 	protected $id = self::ICE;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

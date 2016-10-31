@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class GoldChestplate extends Armor {
 
 	const SLOT_NUMBER = 1;

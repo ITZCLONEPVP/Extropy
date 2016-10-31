@@ -26,7 +26,6 @@ use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 
-
 class DumpMemoryCommand extends VanillaCommand {
 
 	public function __construct($name) {

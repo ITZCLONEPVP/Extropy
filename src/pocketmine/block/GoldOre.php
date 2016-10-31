@@ -29,7 +29,6 @@ class GoldOre extends Solid {
 	protected $id = self::GOLD_ORE;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

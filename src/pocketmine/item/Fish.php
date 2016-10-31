@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 use pocketmine\entity\Effect;
 
 class Fish extends Food {

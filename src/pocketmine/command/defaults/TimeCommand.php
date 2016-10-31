@@ -70,7 +70,6 @@ class TimeCommand extends VanillaCommand {
 			return true;
 		}
 
-
 		if(count($args) < 2) {
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 

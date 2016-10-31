@@ -37,12 +37,11 @@ class SetEntityDataPacket extends DataPacket {
 	public $metadata;
 
 	public function decode() {
-
 	}
 
 	public function encode() {
 		$this->reset();
-		$this->putLong($this->eid);
+		$this->putEntityId($this->eid);
 		$meta = Binary::writeMetadata($this->metadata);
 		$this->put($meta);
 	}

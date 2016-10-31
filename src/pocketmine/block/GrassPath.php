@@ -21,19 +21,16 @@
 
 namespace pocketmine\block;
 
-
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
-
 
 class GrassPath extends Transparent {
 
 	protected $id = self::GRASS_PATH;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

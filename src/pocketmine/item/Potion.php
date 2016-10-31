@@ -251,7 +251,6 @@ class Potion extends Food {
 			}
 		}
 		$human->getInventory()->setItemInHand(Item::get(Item::GLASS_BOTTLE));
-
 	}
 
 	public function getEffects(): array {

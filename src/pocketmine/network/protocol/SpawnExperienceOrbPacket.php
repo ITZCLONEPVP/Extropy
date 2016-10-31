@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class SpawnExperienceOrbPacket extends DataPacket {
 
 	const NETWORK_ID = Info::SPAWN_EXPERIENCE_ORB_PACKET;
@@ -37,7 +36,6 @@ class SpawnExperienceOrbPacket extends DataPacket {
 	public $amount;
 
 	public function decode() {
-
 	}
 
 	public function encode() {

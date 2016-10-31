@@ -23,7 +23,7 @@ namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
 use pocketmine\level\Level;
-use pocketmine\network\protocol\TileEventPacket;
+use pocketmine\network\protocol\BlockEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\tile\Chest;
@@ -72,7 +72,6 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 			$items = array_slice($items, 0, $this->size, true);
 		}
 
-
 		for($i = 0; $i < $this->size; ++$i) {
 			if(!isset($items[$i])) {
 				if($i < $this->left->size) {
@@ -100,7 +99,7 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 		parent::onOpen($who);
 
 		if(count($this->getViewers()) === 1) {
-			$pk = new TileEventPacket();
+			$pk = new BlockEventPacket();
 			$pk->x = $this->right->getHolder()->getX();
 			$pk->y = $this->right->getHolder()->getY();
 			$pk->z = $this->right->getHolder()->getZ();
@@ -114,7 +113,7 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 
 	public function onClose(Player $who) {
 		if(count($this->getViewers()) === 1) {
-			$pk = new TileEventPacket();
+			$pk = new BlockEventPacket();
 			$pk->x = $this->right->getHolder()->getX();
 			$pk->y = $this->right->getHolder()->getY();
 			$pk->z = $this->right->getHolder()->getZ();

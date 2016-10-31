@@ -24,7 +24,6 @@
  */
 namespace pocketmine\level\generator\noise;
 
-
 abstract class Noise {
 
 	protected $perm = [];

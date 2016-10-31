@@ -80,7 +80,7 @@ abstract class Entity extends Location implements Metadatable {
 	const DATA_TYPE_VECTOR3F = 8;
 
 	const DATA_FLAGS = 0;
-	const DATA_VARINT = 1;
+	const DATA_VARIANT = 1;
 	const DATA_COLOUR = 2;
 	const DATA_NAMETAG = 3;
 	const DATA_OWNER_EID = 4;
@@ -96,7 +96,7 @@ abstract class Entity extends Location implements Metadatable {
 	// const DATA_LONG = 41;
 	const DATA_URL_TAG = 43;
 	const DATA_MAX_AIR = 44;
-	const DATA_MARK_VARINT = 45;
+	const DATA_MARK_VARIANT = 45;
 	// const DATA_BYTE = 46;
 	// const DATA_INT = 47;
 	// const DATA_INT = 48;
@@ -110,7 +110,6 @@ abstract class Entity extends Location implements Metadatable {
 	// const DATA_BYTE = 57
 	// const DATA_FLOAT = 58
 	// const DATA_FLOAT = 59;
-
 
 	const DATA_FLAG_ONFIRE = 0;
 	const DATA_FLAG_SNEAKING = 1;
@@ -378,8 +377,7 @@ abstract class Entity extends Location implements Metadatable {
 		if(!isset($this->namedtag->Air)) {
 			$this->namedtag->Air = new ShortTag("Air", 300);
 		}
-		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
-		//		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
+		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)) {
 			$this->namedtag->OnGround = new ByteTag("OnGround", 0);
@@ -569,6 +567,57 @@ abstract class Entity extends Location implements Metadatable {
 		return $this->eyeHeight;
 	}
 
+	/**
+	 * @param int $id
+	 * @param int $type
+	 * @param mixed $value
+	 */
+	public function setDataProperty($id, $type, $value) {
+		if($this->getDataProperty($id) !== $value) {
+			$this->dataProperties[$id] = [$type, $value];
+
+			$targets = $this->hasSpawned;
+			if($this instanceof Player) {
+				if(!$this->spawned) {
+					return;
+				}
+				$targets[] = $this;
+			}
+
+			$this->sendData($targets, [$id => $this->dataProperties[$id]]);
+		}
+	}
+
+	/**
+	 * @param int $id
+	 *
+	 * @return mixed
+	 */
+	public function getDataProperty($id) {
+		return isset($this->dataProperties[$id]) ? $this->dataProperties[$id][1] : null;
+	}
+
+	/**
+	 * @param Player[]|Player $player
+	 * @param array $data Properly formatted entity data, defaults to everything
+	 */
+	public function sendData($player, array $data = null) {
+		if(!is_array($player)) {
+			$player = [$player];
+		}
+		$pk = new SetEntityDataPacket();
+		$pk->eid = $this->getId();
+		$pk->metadata = $data === null ? $this->dataProperties : $data;
+		foreach($player as $p) {
+			if($p === $this) continue;
+			$p->dataPacket(clone $pk);
+		}
+		if($this instanceof Player) {
+			$pk->eid = 0;
+			$this->dataPacket($pk);
+		}
+	}
+
 	protected function initEntity() {
 		if(isset($this->namedtag->ActiveEffects)) {
 			foreach($this->namedtag->ActiveEffects->getValue() as $e) {
@@ -582,7 +631,6 @@ abstract class Entity extends Location implements Metadatable {
 				$this->addEffect($effect);
 			}
 		}
-
 
 		if(isset($this->namedtag->CustomName)) {
 			$this->setNameTag($this->namedtag["CustomName"]);
@@ -643,57 +691,6 @@ abstract class Entity extends Location implements Metadatable {
 		} else {
 			$this->setDataProperty(Entity::DATA_POTION_COLOR, Entity::DATA_TYPE_INT, 0);
 			$this->setDataProperty(Entity::DATA_POTION_AMBIENT, Entity::DATA_TYPE_BYTE, 0);
-		}
-	}
-
-	/**
-	 * @param int $id
-	 * @param int $type
-	 * @param mixed $value
-	 */
-	public function setDataProperty($id, $type, $value) {
-		if($this->getDataProperty($id) !== $value) {
-			$this->dataProperties[$id] = [$type, $value];
-
-			$targets = $this->hasSpawned;
-			if($this instanceof Player) {
-				if(!$this->spawned) {
-					return;
-				}
-				$targets[] = $this;
-			}
-
-			$this->sendData($targets, [$id => $this->dataProperties[$id]]);
-		}
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @return mixed
-	 */
-	public function getDataProperty($id) {
-		return isset($this->dataProperties[$id]) ? $this->dataProperties[$id][1] : null;
-	}
-
-	/**
-	 * @param Player[]|Player $player
-	 * @param array $data Properly formatted entity data, defaults to everything
-	 */
-	public function sendData($player, array $data = null) {
-		if(!is_array($player)) {
-			$player = [$player];
-		}
-		$pk = new SetEntityDataPacket();
-		$pk->eid = $this->getId();
-		$pk->metadata = $data === null ? $this->dataProperties : $data;
-		foreach($player as $p) {
-			if($p === $this) continue;
-			$p->dataPacket(clone $pk);
-		}
-		if($this instanceof Player) {
-			$pk->eid = 0;
-			$this->dataPacket($pk);
 		}
 	}
 
@@ -825,8 +822,8 @@ abstract class Entity extends Location implements Metadatable {
 		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE);
 	}
 
-	public function setImmobile($value = true) : bool {
-		return $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE, $value);
+	public function setImmobile($value = true) {
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE, $value);
 	}
 
 	public function setSneaking($value = true) {
@@ -1247,7 +1244,6 @@ abstract class Entity extends Location implements Metadatable {
 	}
 
 	public function onCollideWithPlayer(Human $entityPlayer) {
-
 	}
 
 	public function getPosition() {
@@ -1389,7 +1385,6 @@ abstract class Entity extends Location implements Metadatable {
 
 			$list = $this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz));
 
-
 			foreach($list as $bb) {
 				$dy = $bb->calculateYOffset($this->boundingBox, $dy);
 			}
@@ -1427,7 +1422,6 @@ abstract class Entity extends Location implements Metadatable {
 				$dy = 0;
 				$dz = 0;
 			}
-
 
 			if($this->stepHeight > 0 and $fallingFlag and $this->ySize < 0.05 and ($movX != $dx or $movZ != $dz)) {
 				$cx = $dx;
@@ -1495,7 +1489,6 @@ abstract class Entity extends Location implements Metadatable {
 						$this->ySize += $diff + 0.01;
 					}
 				}
-
 			}
 
 			$pos = $this->temporalVector->setComponents(($this->boundingBox->minX + $this->boundingBox->maxX) / 2, $this->boundingBox->minY + $this->ySize, ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2);

@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class GoldBoots extends Armor {
 
 	const SLOT_NUMBER = 3;

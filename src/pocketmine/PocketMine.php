@@ -115,7 +115,6 @@ namespace pocketmine {
 	$autoloader->addPath(\pocketmine\PATH . "src" . DIRECTORY_SEPARATOR . "spl");
 	$autoloader->register(true);
 
-
 	set_time_limit(0); //Who set it to 30 seconds?!?!
 
 	gc_enable();
@@ -467,5 +466,4 @@ namespace pocketmine {
 	echo Terminal::$FORMAT_RESET . "\n";
 
 	exit(0);
-
 }

@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class ChainLeggings extends Armor {
 
 	const SLOT_NUMBER = 2;

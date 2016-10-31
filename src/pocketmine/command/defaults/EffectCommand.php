@@ -104,7 +104,6 @@ class EffectCommand extends VanillaCommand {
 			$player->addEffect($effect);
 		}
 
-
 		return true;
 	}
 }

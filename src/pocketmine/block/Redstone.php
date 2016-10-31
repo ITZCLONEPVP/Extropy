@@ -29,7 +29,6 @@ class Redstone extends RedstoneSource {
 	protected $id = self::REDSTONE_BLOCK;
 
 	public function __construct() {
-
 	}
 
 	public function getBoundingBox() {

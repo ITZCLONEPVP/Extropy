@@ -21,7 +21,6 @@
 
 namespace pocketmine\command;
 
-
 interface CommandExecutor {
 
 	/**

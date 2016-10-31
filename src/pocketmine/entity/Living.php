@@ -21,7 +21,6 @@
 
 namespace pocketmine\entity;
 
-
 use pocketmine\block\Block;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -214,7 +213,6 @@ abstract class Living extends Entity implements Damageable {
 				return $block;
 			}
 		} catch(\ArrayOutOfBoundsException $e) {
-
 		}
 
 		return null;
@@ -275,7 +273,7 @@ abstract class Living extends Entity implements Damageable {
 			unset($this->namedtag->HealF);
 		}
 
-		if(!isset($this->namedtag->Health) or !($this->namedtag->Health instanceof Short)) {
+		if(!isset($this->namedtag->Health) or !($this->namedtag->Health instanceof ShortTag)) {
 			$this->namedtag->Health = new ShortTag("Health", $this->getMaxHealth());
 		}
 

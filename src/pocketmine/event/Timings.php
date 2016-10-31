@@ -21,7 +21,6 @@
 
 namespace pocketmine\event;
 
-
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginManager;
 use pocketmine\scheduler\PluginTask;
@@ -187,7 +186,6 @@ abstract class Timings {
 
 		self::$playerCommandTimer = new TimingsHandler("** playerCommand");
 
-
 		self::$timerBatchPacket = new TimingsHandler("timerBatchPacket");
 		self::$timerLoginPacket = new TimingsHandler("timerLoginPacket");
 		self::$timerMovePacket = new TimingsHandler("timerMovePacket");
@@ -210,7 +208,6 @@ abstract class Timings {
 		self::$timerMoveSend = new TimingsHandler("timerMoveSend");
 		self::$timerMoutionPrepare = new TimingsHandler("timerMoutionPrepare");
 		self::$timerMoutionSend = new TimingsHandler("timerMoutionSend");
-
 	}
 
 	/**

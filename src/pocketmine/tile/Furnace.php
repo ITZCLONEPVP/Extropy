@@ -250,7 +250,6 @@ class Furnace extends Tile implements InventoryHolder, Container, Nameable {
 				$pk->value = $this->namedtag["BurnTicks"];
 				$player->dataPacket($pk);
 			}
-
 		}
 
 		$this->lastUpdate = microtime(true);

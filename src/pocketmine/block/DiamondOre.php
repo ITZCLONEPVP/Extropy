@@ -29,7 +29,6 @@ class DiamondOre extends Solid {
 	protected $id = self::DIAMOND_ORE;
 
 	public function __construct() {
-
 	}
 
 	public function getHardness() {
@@ -47,7 +46,6 @@ class DiamondOre extends Solid {
 	public function getDrops(Item $item) : array {
 		if($item->isPickaxe() >= 4) {
 			return [[Item::DIAMOND, 0, 1],];
-
 		} else {
 			return [];
 		}

@@ -29,7 +29,6 @@ class EmeraldOre extends Solid {
 	protected $id = self::EMERALD_ORE;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class BeetrootSoup extends Food {
 
 	public function __construct($meta = 0, $count = 1) {

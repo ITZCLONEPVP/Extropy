@@ -54,7 +54,6 @@ class DeadBush extends Flowable {
 		} else {
 			return [[Item::STICK, 0, mt_rand(0, 2)],];
 		}
-
 	}
 
 }

@@ -19,11 +19,11 @@
  *
 */
 
-
 namespace pocketmine\item;
 
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
+use pocketmine\item\enchantment\Enchantment;
 
 abstract class Tool extends Item {
 

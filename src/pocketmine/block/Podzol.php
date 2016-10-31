@@ -29,7 +29,6 @@ class Podzol extends Solid {
 	protected $id = self::PODZOL;
 
 	public function __construct() {
-
 	}
 
 	public function getToolType() {
@@ -50,6 +49,5 @@ class Podzol extends Solid {
 
 	public function getDrops(Item $item) : array {
 		return [[Item::DIRT, 0, 1],];
-
 	}
 }

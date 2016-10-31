@@ -151,7 +151,6 @@ class ParticleCommand extends VanillaCommand {
 				return new HeartParticle($pos, $data !== null ? $data : 0);
 			case "ink":
 				return new InkParticle($pos, $data !== null ? $data : 0);
-
 		}
 
 		if(substr($name, 0, 10) === "iconcrack_") {

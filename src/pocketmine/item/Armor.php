@@ -19,7 +19,6 @@
  *
 */
 
-
 namespace pocketmine\item;
 
 use pocketmine\nbt\tag\CompoundTag;

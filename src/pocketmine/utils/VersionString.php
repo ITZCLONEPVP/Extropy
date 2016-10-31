@@ -21,7 +21,6 @@
 
 namespace pocketmine\utils;
 
-
 /**
  * Manages Extropy version strings, and compares them
  */

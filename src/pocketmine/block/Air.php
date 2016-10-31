@@ -23,7 +23,6 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 
-
 /**
  * Air block
  */
@@ -34,7 +33,6 @@ class Air extends Transparent {
 	protected $meta = 0;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

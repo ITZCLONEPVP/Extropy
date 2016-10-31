@@ -21,7 +21,6 @@
 
 namespace pocketmine\level\generator\normal\biome;
 
-
 class SmallMountainsBiome extends MountainsBiome {
 
 	public function __construct() {

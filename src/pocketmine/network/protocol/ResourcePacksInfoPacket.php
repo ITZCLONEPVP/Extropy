@@ -23,6 +23,7 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\resourcepacks\ResourcePackInfoEntry;
 
 class ResourcePacksInfoPacket extends DataPacket {
 
@@ -37,11 +38,11 @@ class ResourcePacksInfoPacket extends DataPacket {
 	public $resourcePackEntries = [];
 
 	public function decode() {
-
 	}
 
 	public function encode() {
 		$this->reset();
+
 		$this->putBool($this->mustAccept);
 		$this->putShort(count($this->behaviourPackEntries));
 		foreach($this->behaviourPackEntries as $entry) {

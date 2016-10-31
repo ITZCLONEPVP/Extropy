@@ -21,7 +21,6 @@
 
 namespace pocketmine\plugin;
 
-
 abstract class PluginLoadOrder {
 
 	/*

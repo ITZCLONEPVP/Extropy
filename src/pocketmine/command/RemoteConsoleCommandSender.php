@@ -21,7 +21,6 @@
 
 namespace pocketmine\command;
 
-
 class RemoteConsoleCommandSender extends ConsoleCommandSender {
 
 	/** @var string */

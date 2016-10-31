@@ -33,7 +33,6 @@ class Grass extends Solid {
 	protected $id = self::GRASS;
 
 	public function __construct() {
-
 	}
 
 	public function canBeActivated() : bool {

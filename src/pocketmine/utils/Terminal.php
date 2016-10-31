@@ -88,7 +88,6 @@ abstract class Terminal {
 
 				return;
 		}
-
 		//TODO: iOS
 	}
 

@@ -29,7 +29,6 @@ class Lapis extends Solid {
 	protected $id = self::LAPIS_BLOCK;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

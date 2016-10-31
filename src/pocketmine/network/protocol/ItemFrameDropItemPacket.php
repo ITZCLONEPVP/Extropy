@@ -41,7 +41,6 @@ class ItemFrameDropItemPacket extends DataPacket {
 	}
 
 	public function encode() {
-
 	}
 
 }

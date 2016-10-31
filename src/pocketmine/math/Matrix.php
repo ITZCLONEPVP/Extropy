@@ -21,7 +21,6 @@
 
 namespace pocketmine\math;
 
-
 class Matrix implements \ArrayAccess {
 
 	private $matrix = [];

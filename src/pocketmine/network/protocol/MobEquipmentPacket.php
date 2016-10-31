@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class MobEquipmentPacket extends DataPacket {
 
 	const NETWORK_ID = Info::MOB_EQUIPMENT_PACKET;
@@ -36,36 +35,23 @@ class MobEquipmentPacket extends DataPacket {
 
 	public $selectedSlot;
 
+	public $unknownByte;
+
 	public function decode() {
-		$this->eid = $this->getLong();
+		$this->eid = $this->getEntityId(); //EntityRuntimeID
 		$this->item = $this->getSlot();
-		//		$this->slot = $this->getByte();
-		//		$this->selectedSlot = $this->getByte();
-		$slot = $this->getByte();
-		$this->slot = ($slot !== false) ? $slot : -1;
-		$selectedSlot = $this->getByte();
-		$this->selectedSlot = ($selectedSlot !== false) ? $selectedSlot : -1;
+		$this->slot = $this->getByte();
+		$this->selectedSlot = $this->getByte();
+		$this->unknownByte = $this->getByte();
 	}
-
-	public function getByte() {
-		if(isset($this->buffer{$this->offset})) {
-			return ord($this->buffer{$this->offset++});
-		}
-
-		return false;
-	}
-
-	/* 
-	 * Aniti notice
-	 * TODO may be packet have change in 0.14.? 
-	 */
 
 	public function encode() {
 		$this->reset();
-		$this->putLong($this->eid);
+		$this->putEntityId($this->eid); //EntityRuntimeID
 		$this->putSlot($this->item);
 		$this->putByte($this->slot);
 		$this->putByte($this->selectedSlot);
+		$this->putByte($this->unknownByte);
 	}
 
 }

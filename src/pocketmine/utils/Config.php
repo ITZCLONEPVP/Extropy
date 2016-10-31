@@ -21,7 +21,6 @@
 
 namespace pocketmine\utils;
 
-
 /**
  * Class Config
  *

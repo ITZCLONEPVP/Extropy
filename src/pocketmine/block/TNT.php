@@ -37,7 +37,6 @@ class TNT extends Solid {
 	protected $id = self::TNT;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

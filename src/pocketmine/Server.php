@@ -458,7 +458,6 @@ class Server {
 			$this->setDefaultLevel($this->getLevelByName($default));
 		}
 
-
 		$this->properties->save();
 
 		if(!($this->getDefaultLevel() instanceof Level)) {
@@ -1001,7 +1000,6 @@ class Server {
 			$this->logger->emergency("Crashed while crashing, killing process");
 			@kill(getmypid());
 		}
-
 	}
 
 	/**
@@ -1066,7 +1064,6 @@ class Server {
 			pcntl_signal(SIGHUP, [$this, "handleSignal"]);
 			$this->getScheduler()->scheduleRepeatingTask(new CallbackTask("pcntl_signal_dispatch"), 5);
 		}
-
 
 		$this->getScheduler()->scheduleRepeatingTask(new CallbackTask([$this, "checkTicks"]), 20 * 5);
 
@@ -1165,7 +1162,6 @@ class Server {
 		++$this->tickCounter;
 
 		$this->checkConsole();
-
 
 		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0) $this->mainInterface->putReadyPacket($str);
 
@@ -1623,7 +1619,6 @@ class Server {
 		// $this->saveOfflinePlayerData($name, $nbt);
 
 		return $nbt;
-
 	}
 
 	/**

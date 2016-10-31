@@ -32,7 +32,6 @@ class InventoryActionPacket extends DataPacket {
 	public $item;
 
 	public function decode() {
-
 	}
 
 	public function encode() {

@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class LeatherBoots extends Armor {
 
 	const SLOT_NUMBER = 3;

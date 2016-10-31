@@ -39,7 +39,6 @@ class FileWriteTask extends AsyncTask {
 		try {
 			file_put_contents($this->path, $this->contents, (int)$this->flags);
 		} catch(\Throwable $e) {
-
 		}
 	}
 }

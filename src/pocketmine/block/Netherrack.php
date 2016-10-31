@@ -29,7 +29,6 @@ class Netherrack extends Solid {
 	protected $id = self::NETHERRACK;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

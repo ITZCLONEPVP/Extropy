@@ -30,7 +30,6 @@ class CoalOre extends Solid {
 	protected $id = self::COAL_ORE;
 
 	public function __construct() {
-
 	}
 
 	public function getHardness() {
@@ -55,7 +54,6 @@ class CoalOre extends Solid {
 
 				return [[Item::COAL, 0, $time],];
 			}
-
 		} else {
 			return [];
 		}

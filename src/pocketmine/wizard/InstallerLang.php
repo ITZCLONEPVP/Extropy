@@ -21,7 +21,6 @@
 
 namespace pocketmine\wizard;
 
-
 class InstallerLang {
 
 	public static $languages = ["en" => "English", "es" => "Español", "zh" => "中文", "ru" => "Pyccĸий", "ja" => "日本語", "de" => "Deutsch", //"vi" => "Tiếng Việt",
@@ -65,7 +64,6 @@ class InstallerLang {
 		if($this->lang !== "en") {
 			$this->loadLang($this->langfile, $this->lang);
 		}
-
 	}
 
 	public function loadLang($langfile, $lang = "en") {

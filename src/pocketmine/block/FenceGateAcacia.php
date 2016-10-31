@@ -21,7 +21,6 @@
 
 namespace pocketmine\block;
 
-
 class FenceGateAcacia extends FenceGate {
 
 	protected $id = self::FENCE_GATE_ACACIA;

@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class CookedFish extends Fish {
 
 	public function __construct($meta = 0, $count = 1) {

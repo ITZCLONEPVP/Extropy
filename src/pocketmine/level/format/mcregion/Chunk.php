@@ -407,7 +407,6 @@ class Chunk extends BaseFullChunk {
 		$nbt->Entities = new ListTag("Entities", $entities);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
 
-
 		$tiles = [];
 		foreach($this->getTiles() as $tile) {
 			$tile->saveNBT();

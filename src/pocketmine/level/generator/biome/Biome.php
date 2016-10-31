@@ -94,7 +94,6 @@ abstract class Biome {
 
 		self::register(self::ICE_PLAINS, new IcePlainsBiome());
 
-
 		self::register(self::SMALL_MOUNTAINS, new SmallMountainsBiome());
 
 		self::register(self::BIRCH_FOREST, new ForestBiome(ForestBiome::TYPE_BIRCH));

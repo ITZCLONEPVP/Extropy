@@ -62,7 +62,6 @@ class FishingHook extends Projectile {
 		if(isset($this->namedtag->Data)) {
 			$this->data = $this->namedtag["Data"];
 		}
-
 		// $this->setDataProperty(FallingSand::DATA_BLOCK_INFO, self::DATA_TYPE_INT, $this->getData());
 	}
 
@@ -134,16 +133,16 @@ class FishingHook extends Projectile {
 			$fishes = [ItemItem::RAW_FISH, ItemItem::RAW_SALMON, ItemItem::CLOWN_FISH, ItemItem::PUFFER_FISH];
 			$fish = array_rand($fishes, 1);
 			$item = ItemItem::get($fishes[$fish]);
-			$this->getLevel()->getServer()->getPluginManager()->callEvent($ev = new PlayerFishEvent($this->shootingEntity, $item, $this));
-			if(!$ev->isCancelled()) {
-				$this->shootingEntity->getInventory()->addItem($item);
-				$this->shootingEntity->addExperience(mt_rand(1, 6));
-				$this->damageRod = true;
-			}
+			//			$this->getLevel()->getServer()->getPluginManager()->callEvent($ev = new PlayerFishEvent($this->shootingEntity, $item, $this));
+			//			if(!$ev->isCancelled()) {
+			//				$this->shootingEntity->getInventory()->addItem($item);
+			//				$this->shootingEntity->addExperience(mt_rand(1, 6));
+			//				$this->damageRod = true;
+			//			}
 		}
 
 		if($this->shootingEntity instanceof Player) {
-			$this->shootingEntity->unlinkHookFromPlayer();
+			//			$this->shootingEntity->unlinkHookFromPlayer();
 		}
 
 		if(!$this->closed) {
@@ -166,7 +165,7 @@ class FishingHook extends Projectile {
 		$pk->speedZ = $this->motionZ;
 		$pk->yaw = $this->yaw;
 		$pk->pitch = $this->pitch;
-		//		$pk->metadata = $this->dataProperties;
+		$pk->metadata = $this->dataProperties;
 		$player->dataPacket($pk);
 
 		parent::spawnTo($player);

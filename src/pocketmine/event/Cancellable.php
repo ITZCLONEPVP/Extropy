@@ -21,7 +21,6 @@
 
 namespace pocketmine\event;
 
-
 /**
  * Events that can be cancelled must use the interface Cancellable
  */

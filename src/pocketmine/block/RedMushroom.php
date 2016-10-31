@@ -29,7 +29,6 @@ class RedMushroom extends Flowable {
 	protected $id = self::RED_MUSHROOM;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

@@ -128,7 +128,6 @@ class PacketMaker extends Worker {
 				$this->externalQueue[] = $this->makeBuffer($target[0], $pk, false, false);
 			}
 		}
-
 	}
 
 	protected function makeBuffer($identifier, $fullPacket, $needACK, $identifierACK) {

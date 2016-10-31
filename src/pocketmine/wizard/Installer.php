@@ -54,7 +54,6 @@ class Installer {
 		} while($lang == false);
 		$this->lang = new InstallerLang($lang);
 
-
 		echo "[*] " . $this->lang->language_has_been_selected . "\n";
 
 		if(!$this->showLicense()) {
@@ -107,7 +106,6 @@ LICENSE;
 		echo "[*] " . $this->lang->setting_up_server_now . "\n";
 		echo "[*] " . $this->lang->default_values_info . "\n";
 		echo "[*] " . $this->lang->server_properties . "\n";
-
 	}
 
 	private function generateBaseConfig() {
@@ -180,7 +178,6 @@ LICENSE;
 		}
 
 		$config->save();
-
 
 		echo "[*] " . $this->lang->ip_get . "\n";
 

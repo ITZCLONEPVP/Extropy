@@ -35,7 +35,6 @@ class RedstoneSource extends Flowable {
 	protected $activated = false;
 
 	public function __construct() {
-
 	}
 
 	public function getMaxStrength() {

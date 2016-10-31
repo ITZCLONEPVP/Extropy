@@ -81,7 +81,6 @@ class SpawnerCreature {
 			}
 		}
 
-
 		if($useAnimal) {
 			while($anamalCount < $server->getAnimalLimit() && count($chunks) > 0) {
 				$key = array_rand($chunks);
@@ -102,7 +101,6 @@ class SpawnerCreature {
 				}
 			}
 		}
-
 
 		$time = $level->getTime() % 30000;
 		$isNight = $time > 16000 && $time < 29000;

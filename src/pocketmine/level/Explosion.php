@@ -181,7 +181,6 @@ class Explosion {
 			}
 		}
 
-
 		$air = Item::get(Item::AIR);
 
 		foreach($this->affectedBlocks as $block) {

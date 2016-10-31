@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class ChangeDimensionPacket extends DataPacket {
 
 	const NETWORK_ID = Info::CHANGE_DIMENSION_PACKET;
@@ -42,7 +41,6 @@ class ChangeDimensionPacket extends DataPacket {
 	public $unknown; //bool
 
 	public function decode() {
-
 	}
 
 	public function encode() {

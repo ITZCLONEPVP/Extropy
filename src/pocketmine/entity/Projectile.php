@@ -182,7 +182,6 @@ abstract class Projectile extends Entity {
 				$this->kill();
 				$hasUpdate = true;
 			}
-
 		}
 
 		return $hasUpdate;

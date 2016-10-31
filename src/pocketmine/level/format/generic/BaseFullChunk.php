@@ -397,7 +397,6 @@ abstract class BaseFullChunk implements FullChunk {
 	}
 
 	public function setLightPopulated($value = 1) {
-
 	}
 
 	public function setBlockIdArray($arr) {

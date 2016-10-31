@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class LeatherTunic extends Armor {
 
 	const SLOT_NUMBER = 1;

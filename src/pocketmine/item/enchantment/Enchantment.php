@@ -21,7 +21,6 @@
 
 namespace pocketmine\item\enchantment;
 
-
 class Enchantment {
 
 	const TYPE_INVALID = -1;

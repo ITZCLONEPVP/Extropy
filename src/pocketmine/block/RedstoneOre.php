@@ -30,7 +30,6 @@ class RedstoneOre extends Solid {
 	protected $id = self::REDSTONE_ORE;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

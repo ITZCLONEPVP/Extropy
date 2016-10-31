@@ -29,7 +29,6 @@ class Gold extends Solid {
 	protected $id = self::GOLD_BLOCK;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

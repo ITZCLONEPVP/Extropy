@@ -167,7 +167,6 @@ abstract class AsyncTask extends Collectable {
 	 * @return void
 	 */
 	public function onCompletion(Server $server) {
-
 	}
 
 	public function cleanObject() {

@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class TextPacket extends DataPacket {
 
 	const NETWORK_ID = Info::TEXT_PACKET;
@@ -56,12 +55,12 @@ class TextPacket extends DataPacket {
 				$this->message = $this->getString();
 				break;
 
-			//			case self::TYPE_TRANSLATION:
-			//				$this->message = $this->getString();
-			//				$count = $this->getByte();
-			//				for($i = 0; $i < $count; ++$i){
-			//					$this->parameters[] = $this->getString();
-			//				}
+			case self::TYPE_TRANSLATION:
+				$this->message = $this->getString();
+				$count = $this->getByte();
+				for($i = 0; $i < $count; ++$i) {
+					$this->parameters[] = $this->getString();
+				}
 		}
 	}
 
@@ -78,12 +77,12 @@ class TextPacket extends DataPacket {
 				$this->putString($this->message);
 				break;
 
-			//			case self::TYPE_TRANSLATION:
-			//				$this->putString($this->message);
-			//				$this->putByte(count($this->parameters));
-			//				foreach($this->parameters as $p){
-			//					$this->putString($p);
-			//				}
+			case self::TYPE_TRANSLATION:
+				$this->putString($this->message);
+				$this->putByte(count($this->parameters));
+				foreach($this->parameters as $p) {
+					$this->putString($p);
+				}
 		}
 	}
 

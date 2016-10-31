@@ -21,12 +21,12 @@
 
 namespace pocketmine\network\protocol;
 
-	#include <rules/DataPacket.h>
-
 #ifndef COMPILE
 use pocketmine\utils\Binary;
 
 #endif
+
+#include <rules/DataPacket.h>
 
 class AddEntityPacket extends DataPacket {
 
@@ -52,30 +52,33 @@ class AddEntityPacket extends DataPacket {
 
 	public $pitch;
 
+	public $modifiers;
+
 	public $metadata = [];
 
 	public $links = [];
 
 	public function decode() {
-
 	}
 
 	public function encode() {
 		$this->reset();
-		$this->putLong($this->eid);
-		$this->putInt($this->type);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->speedX);
-		$this->putFloat($this->speedY);
-		$this->putFloat($this->speedZ);
-		$this->putFloat($this->yaw);
-		$this->putFloat($this->pitch);
-		$this->putInt(0);
-		if(!empty($this->metadata)) {
-			$meta = Binary::writeMetadata($this->metadata);
-			$this->put($meta);
+		$this->putEntityId($this->eid); //EntityUniqueID - TODO: verify this
+		$this->putEntityId($this->eid);
+		$this->putUnsignedVarInt($this->type);
+		$this->putVector3f($this->x, $this->y, $this->z);
+		$this->putVector3f($this->speedX, $this->speedY, $this->speedZ);
+		$this->putLFloat($this->yaw * (256 / 360));
+		$this->putLFloat($this->pitch * (256 / 360));
+		$this->putUnsignedVarInt($this->modifiers); //attributes?
+		$meta = Binary::writeMetadata($this->metadata);
+		$this->put($meta);
+		$this->putUnsignedVarInt(count($this->links));
+		foreach($this->links as $link) {
+			$this->putEntityId($link[0]);
+			$this->putEntityId($link[1]);
+			$this->putByte($link[2]);
 		}
 	}
+
 }

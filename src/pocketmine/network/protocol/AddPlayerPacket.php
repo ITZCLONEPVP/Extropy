@@ -21,12 +21,12 @@
 
 namespace pocketmine\network\protocol;
 
-	#include <rules/DataPacket.h>
-
 #ifndef COMPILE
 use pocketmine\utils\Binary;
 
 #endif
+
+#include <rules/DataPacket.h>
 
 class AddPlayerPacket extends DataPacket {
 
@@ -56,28 +56,23 @@ class AddPlayerPacket extends DataPacket {
 
 	public $item;
 
-	public $metadata;
+	public $metadata = [];
 
 	public function decode() {
-
 	}
 
 	public function encode() {
 		$this->reset();
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
-		$this->putLong($this->eid);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->speedX);
-		$this->putFloat($this->speedY);
-		$this->putFloat($this->speedZ);
-		$this->putFloat($this->yaw);
-		$this->putFloat($this->yaw); //TODO head-rot
-		$this->putFloat($this->pitch);
-		$this->putShort(0);
-		//		$this->putSlot($this->item);
+		$this->putEntityId($this->eid); //EntityUniqueID
+		$this->putEntityId($this->eid); //EntityRuntimeID
+		$this->putVector3f($this->x, $this->y, $this->z);
+		$this->putVector3f($this->speedX, $this->speedY, $this->speedZ);
+		$this->putLFloat($this->yaw);
+		$this->putLFloat($this->yaw);
+		$this->putLFloat($this->pitch);
+		$this->putSlot($this->item);
 
 		$meta = Binary::writeMetadata($this->metadata);
 		$this->put($meta);

@@ -21,7 +21,6 @@
 
 namespace pocketmine\entity;
 
-
 abstract class Animal extends Creature implements Ageable {
 
 	public function isBaby() {

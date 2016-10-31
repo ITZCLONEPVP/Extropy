@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class Coal extends Item {
 
 	const NORMAL = 0;

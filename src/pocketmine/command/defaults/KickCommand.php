@@ -58,7 +58,6 @@ class KickCommand extends VanillaCommand {
 			$sender->sendMessage($name . " not found.");
 		}
 
-
 		return true;
 	}
 }

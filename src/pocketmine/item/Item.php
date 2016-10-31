@@ -439,7 +439,6 @@ class Item implements ItemIds {
 				self::addCreativeItem(Item::get($item["ID"], $item["Damage"]));
 			}
 		}
-
 	}
 
 	public static function clearCreativeItems() {

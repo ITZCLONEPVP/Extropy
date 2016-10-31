@@ -65,7 +65,6 @@ class Flat extends Generator {
 			$ores->setOreTypes([new object\OreType(new CoalOre(), 20, 16, 0, 128), new object\OreType(new IronOre(), 20, 8, 0, 64), new object\OreType(new RedstoneOre(), 8, 7, 0, 16), new object\OreType(new LapisOre(), 1, 6, 0, 32), new object\OreType(new GoldOre(), 2, 8, 0, 32), new object\OreType(new DiamondOre(), 1, 7, 0, 16), new object\OreType(new Dirt(), 20, 32, 0, 128), new object\OreType(new Gravel(), 10, 16, 0, 128),]);
 			$this->populators[] = $ores;
 		}
-
 		/*if(isset($this->options["mineshaft"])){
 			$this->populators[] = new MineshaftPopulator(isset($this->options["mineshaft"]["chance"]) ? floatval($this->options["mineshaft"]["chance"]) : 0.01);
 		}*/
@@ -82,7 +81,6 @@ class Flat extends Generator {
 	public function init(ChunkManager $level, Random $random) {
 		$this->level = $level;
 		$this->random = $random;
-
 		/*
 		  // Commented out : We want to delay this
 		if(isset($this->options["preset"]) and $this->options["preset"] != ""){
@@ -132,7 +130,6 @@ class Flat extends Generator {
 			$this->structure[$y] = [0, 0];
 		}
 
-
 		$this->chunk = clone $this->level->getChunk($chunkX, $chunkZ);
 		$this->chunk->setGenerated();
 		$c = Biome::getBiome($biome)->getColor();
@@ -149,7 +146,6 @@ class Flat extends Generator {
 				}
 			}
 		}
-
 
 		preg_match_all('#(([0-9a-z_]{1,})\(?([0-9a-z_ =:]{0,})\)?),?#', $options, $matches);
 		foreach($matches[2] as $i => $option) {
@@ -173,7 +169,6 @@ class Flat extends Generator {
 		foreach($this->populators as $populator) {
 			$populator->populate($this->level, $chunkX, $chunkZ, $this->random);
 		}
-
 	}
 
 	public function getSpawn() {

@@ -21,9 +21,9 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
-
 use pocketmine\item\Item;
+
+#include <rules/DataPacket.h>
 
 class ContainerSetSlotPacket extends DataPacket {
 
@@ -33,7 +33,7 @@ class ContainerSetSlotPacket extends DataPacket {
 
 	public $slot;
 
-	public $hotbarSlot = 0;
+	public $hotbarSlot;
 
 	/** @var Item */
 	public $item;
@@ -52,4 +52,5 @@ class ContainerSetSlotPacket extends DataPacket {
 		$this->putVarInt($this->hotbarSlot);
 		$this->putSlot($this->item);
 	}
+
 }

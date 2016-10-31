@@ -89,7 +89,6 @@ class PermissibleBase implements Permissible {
 		} else {
 			return Permission::$DEFAULT_PERMISSION === Permission::DEFAULT_TRUE or ($this->isOp() and Permission::$DEFAULT_PERMISSION === Permission::DEFAULT_OP) or (!$this->isOp() and Permission::$DEFAULT_PERMISSION === Permission::DEFAULT_NOT_OP);
 		}
-
 	}
 
 	/**
@@ -201,9 +200,7 @@ class PermissibleBase implements Permissible {
 			}
 
 			$this->recalculatePermissions();
-
 		}
-
 	}
 
 	/**

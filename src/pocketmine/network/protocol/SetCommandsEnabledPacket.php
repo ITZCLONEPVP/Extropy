@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class SetCommandsEnabledPacket extends DataPacket {
 
 	const NETWORK_ID = Info::SET_COMMANDS_ENABLED_PACKET;
@@ -31,7 +30,6 @@ class SetCommandsEnabledPacket extends DataPacket {
 	public $enabled;
 
 	public function decode() {
-
 	}
 
 	public function encode() {

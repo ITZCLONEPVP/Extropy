@@ -21,7 +21,6 @@
 
 namespace pocketmine\utils;
 
-
 /**
  * Unsecure Random Number Noise, used for fast seeded values
  */

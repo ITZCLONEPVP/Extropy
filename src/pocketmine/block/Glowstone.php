@@ -29,7 +29,6 @@ class Glowstone extends Transparent implements SolidLight {
 	protected $id = self::GLOWSTONE_BLOCK;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

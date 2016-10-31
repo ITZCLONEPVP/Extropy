@@ -466,7 +466,6 @@ class PluginManager {
 			//				}
 			//			}
 		}
-
 		//		return $subs;
 	}
 

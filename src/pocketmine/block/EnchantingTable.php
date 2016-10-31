@@ -35,7 +35,6 @@ class EnchantingTable extends Transparent {
 	protected $id = self::ENCHANTING_TABLE;
 
 	public function __construct() {
-
 	}
 
 	public function getLightLevel() {

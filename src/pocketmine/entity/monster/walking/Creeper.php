@@ -187,7 +187,6 @@ class Creeper extends WalkingMonster implements Explosive {
 	}
 
 	public function attackEntity(Entity $player) {
-
 	}
 
 	public function getDrops() {

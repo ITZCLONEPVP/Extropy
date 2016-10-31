@@ -21,7 +21,6 @@
 
 namespace pocketmine\block;
 
-
 abstract class Flowable extends Transparent {
 
 	public function canBeFlowedInto() {

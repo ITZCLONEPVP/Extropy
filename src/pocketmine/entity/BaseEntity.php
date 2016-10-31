@@ -75,7 +75,7 @@ abstract class BaseEntity extends Creature {
 		if(isset($this->namedtag->WallCheck)) {
 			$this->setWallCheck($this->namedtag["WallCheck"]);
 		}
-		$this->dataProperties[self::DATA_NO_AI] = [self::DATA_TYPE_BYTE, 1];
+		$this->setImmobile(false);
 	}
 
 	public function saveNBT() {
@@ -132,7 +132,6 @@ abstract class BaseEntity extends Creature {
 	}
 
 	public function knockBack(Entity $attacker, $damage, $x, $z, $base = 0.4) {
-
 	}
 
 	public function entityBaseTick($tickDiff = 1) {

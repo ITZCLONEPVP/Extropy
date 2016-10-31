@@ -23,32 +23,18 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
+class AddItemPacket extends DataPacket {
 
-class TileEntityDataPacket extends DataPacket {
+	const NETWORK_ID = Info::ADD_ITEM_PACKET;
 
-	const NETWORK_ID = Info::TILE_ENTITY_DATA_PACKET;
-
-	public $x;
-
-	public $y;
-
-	public $z;
-
-	public $namedtag;
+	public $item;
 
 	public function decode() {
-		$this->x = $this->getInt();
-		$this->y = $this->getInt();
-		$this->z = $this->getInt();
-		$this->namedtag = $this->get(true);
 	}
 
 	public function encode() {
 		$this->reset();
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
-		$this->put($this->namedtag);
+		$this->putSlot($this->item);
 	}
 
 }

@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class ChainHelmet extends Armor {
 
 	const SLOT_NUMBER = 0;

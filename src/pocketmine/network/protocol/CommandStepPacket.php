@@ -27,18 +27,6 @@ class CommandStepPacket extends DataPacket {
 
 	const NETWORK_ID = Info::COMMAND_STEP_PACKET;
 
-	/**
-	 * unknown (string)
-	 * unknown (string)
-	 * unknown (uvarint)
-	 * unknown (uvarint)
-	 * unknown (bool)
-	 * unknown (uvarint64)
-	 * unknown (string)
-	 * unknown (string)
-	 * https://gist.github.com/dktapps/8285b93af4ca38e0104bfeb9a6c87afd
-	 */
-
 	public $command;
 
 	public $overload;
@@ -60,7 +48,7 @@ class CommandStepPacket extends DataPacket {
 		$this->overload = $this->getString();
 		$this->uvarint1 = $this->getUnsignedVarInt();
 		$this->uvarint2 = $this->getUnsignedVarInt();
-		$this->bool = $this->getBool();
+		$this->bool = (bool)$this->getByte();
 		$this->uvarint64 = $this->getUnsignedVarInt(); //TODO: varint64
 		$this->args = json_decode($this->getString());
 		$this->string4 = $this->getString();
@@ -70,7 +58,6 @@ class CommandStepPacket extends DataPacket {
 	}
 
 	public function encode() {
-
 	}
 
 }

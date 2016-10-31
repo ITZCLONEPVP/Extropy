@@ -74,7 +74,6 @@ class ChunkRequestTask extends AsyncTask {
 		$this->tiles = $tiles;
 
 		$this->compressionLevel = Level::$COMPRESSION_LEVEL;
-
 	}
 
 	public function onRun() {

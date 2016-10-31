@@ -30,7 +30,6 @@ class Cobweb extends Flowable {
 	protected $id = self::COBWEB;
 
 	public function __construct() {
-
 	}
 
 	public function hasEntityCollision() {

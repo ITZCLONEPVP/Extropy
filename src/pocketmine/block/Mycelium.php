@@ -24,13 +24,11 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-
 class Mycelium extends Solid {
 
 	protected $id = self::MYCELIUM;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

@@ -31,7 +31,6 @@ use pocketmine\level\generator\populator\Populator;
 use pocketmine\math\Vector3 as Vector3;
 use pocketmine\utils\Random;
 
-
 class Nether extends Generator {
 
 	private static $GAUSSIAN_KERNEL = null;
@@ -103,7 +102,6 @@ class Nether extends Generator {
 		$this->random->setSeed($this->level->getSeed());
 		$this->noiseBase = new Simplex($this->random, 4, 1 / 4, 1 / 64);
 		$this->random->setSeed($this->level->getSeed());
-
 		/*$ores = new Ore();
 		$ores->setOreTypes([
 			new OreType(new CoalOre(), 20, 16, 0, 128),

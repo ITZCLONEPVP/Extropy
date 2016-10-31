@@ -21,7 +21,6 @@
 
 namespace pocketmine\item\enchantment;
 
-
 class EnchantmentList {
 
 	/** @var EnchantmentEntry[] */

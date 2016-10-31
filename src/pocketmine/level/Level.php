@@ -108,7 +108,6 @@ use pocketmine\utils\Random;
 use pocketmine\utils\ReversePriorityQueue;
 use pocketmine\utils\TextFormat;
 
-
 class Level implements ChunkManager, Metadatable {
 
 	const BLOCK_UPDATE_NORMAL = 1;
@@ -630,7 +629,6 @@ class Level implements ChunkManager, Metadatable {
 
 		$chunk = $this->getChunk($x, $z);
 
-
 		if($chunk !== null) {
 			/* @var BaseFullChunk $chunk */
 			if(!$chunk->allowUnload) return false;
@@ -919,7 +917,6 @@ class Level implements ChunkManager, Metadatable {
 				$this->changedCount = [];
 				$this->changedBlocks = [];
 			}
-
 		}
 
 		$this->processChunkRequest();
@@ -1051,7 +1048,6 @@ class Level implements ChunkManager, Metadatable {
 				$chunkZ = (int)$chunkZ;
 			};
 
-
 			if(!isset($this->chunks[$index]) or ($chunk = $this->getChunk($chunkX, $chunkZ, false)) === null) {
 				unset($this->chunkTickList[$index]);
 				continue;
@@ -1059,11 +1055,9 @@ class Level implements ChunkManager, Metadatable {
 				unset($this->chunkTickList[$index]);
 			}
 
-
 			foreach($chunk->getEntities() as $entity) {
 				$entity->scheduleUpdate();
 			}
-
 
 			if($this->useSections) {
 				foreach($chunk->getSections() as $section) {
@@ -1166,7 +1160,6 @@ class Level implements ChunkManager, Metadatable {
 				/** @var Player $player */
 				if($player->isConnected() and isset($player->usedChunks[$index])) {
 					$player->sendChunk($x, $z, $payload);
-
 				}
 			}
 			unset($this->chunkSendQueue[$index]);
@@ -2481,7 +2474,6 @@ class Level implements ChunkManager, Metadatable {
 			$this->playerHandItemQueue[$sender->getId()] = [];
 		}
 		$this->playerHandItemQueue[$sender->getId()][$recipient->getId()] = ['sender' => $sender, 'recipient' => $recipient, 'time' => microtime(true)];
-
 	}
 
 	public function mayAddPlayerHandItem($sender, $recipient) {
@@ -2556,7 +2548,6 @@ class Level implements ChunkManager, Metadatable {
 		$pk->chunkZ = $z;
 		$pk->data = $data;
 		$pk->encode();
-
 
 		foreach($this->level->getUsingChunk($x, $z) as $player) {
 			$player->dataPacket($pk);

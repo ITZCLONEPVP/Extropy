@@ -225,7 +225,6 @@ class PlayerInventory extends BaseInventory {
 			$item = $ev->getNewItem();
 		}
 
-
 		$old = $this->getItem($index);
 		$this->slots[$index] = clone $item;
 		$this->onSlotChange($index, $old);

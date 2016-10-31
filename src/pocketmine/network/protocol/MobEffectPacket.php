@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class MobEffectPacket extends DataPacket {
 
 	const NETWORK_ID = Info::MOB_EFFECT_PACKET;
@@ -45,17 +44,16 @@ class MobEffectPacket extends DataPacket {
 	public $duration;
 
 	public function decode() {
-
 	}
 
 	public function encode() {
 		$this->reset();
-		$this->putLong($this->eid);
+		$this->putEntityId($this->eid);
 		$this->putByte($this->eventId);
-		$this->putByte($this->effectId);
-		$this->putByte($this->amplifier);
+		$this->putVarInt($this->effectId);
+		$this->putVarInt($this->amplifier);
 		$this->putBool($this->particles);
-		$this->putInt($this->duration);
+		$this->putVarInt($this->duration);
 	}
 
 }

@@ -17,112 +17,89 @@
  * @link http://www.pocketmine.net/
  * 
  *
- */
+*/
 
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\utils\Binary;
-use pocketmine\utils\UUID;
-
 class LoginPacket extends DataPacket {
 
 	const NETWORK_ID = Info::LOGIN_PACKET;
 
-	const POCKET_EDITION = 0;
-
-	public $gameEdition;
+	const EDITION_POCKET = 0;
 
 	public $username;
 
-	public $protocol1;
+	public $protocol;
 
-	public $protocol2;
-
-	public $clientId;
+	public $gameEdition;
 
 	public $clientUUID;
 
-	public $serverAddress;
+	public $clientId;
 
 	public $clientSecret;
 
-	public $slim = false;
+	public $identityPublicKey;
 
-	public $skinName;
+	public $serverAddress;
 
-	public $chainsDataLength;
+	public $skinId;
 
-	public $chains;
-
-	public $playerDataLength;
-
-	public $playerData;
-
-	public $isValidProtocol = true;
+	public $skin = null;
 
 	public function decode() {
-		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
-		$this->protocol1 = $this->getInt();
-		if(!in_array($this->protocol1, $acceptedProtocols)) {
-			$this->isValidProtocol = false;
+		$this->protocol = $this->getInt();
 
-			return;
+		if($this->protocol !== Info::CURRENT_PROTOCOL) {
+			return; //Do not attempt to decode for non-accepted protocols
 		}
 
 		$this->gameEdition = $this->getByte();
 
-		$body = zlib_decode($this->getString());
-		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
-		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
+		$str = zlib_decode($this->getString(), 1024 * 1024 * 64);
 
-		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
-		$this->playerData = $this->getFromString($body, $this->playerDataLength);
+		$this->setBuffer($str, 0);
 
-		$this->chains['data'] = [];
-		$index = 0;
-		foreach($this->chains['chain'] as $key => $jwt) {
-			$data = self::load($jwt);
-			if(isset($data['extraData'])) {
-				$dataIndex = $index;
+		$chainData = json_decode($this->get($this->getLInt()));
+		foreach($chainData->{"chain"} as $chain) {
+			$webtoken = $this->decodeToken($chain);
+			if(isset($webtoken["extraData"])) {
+				if(isset($webtoken["extraData"]["displayName"])) {
+					$this->username = $webtoken["extraData"]["displayName"];
+				}
+				if(isset($webtoken["extraData"]["identity"])) {
+					$this->clientUUID = $webtoken["extraData"]["identity"];
+				}
+				if(isset($webtoken["identityPublicKey"])) {
+					$this->identityPublicKey = $webtoken["identityPublicKey"];
+				}
 			}
-			$this->chains['data'][$index] = $data;
-			$index++;
 		}
 
-		$this->playerData = self::load($this->playerData);
-		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
-		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
-		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
-		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-
-		$this->serverAddress = $this->playerData['ServerAddress'];
-		$this->skinName = $this->playerData['SkinId'];
-		$this->skin = base64_decode($this->playerData['SkinData']);
-		$this->clientSecret = $this->playerData['ClientRandomId'];
-	}
-
-	private function getFromString(&$body, $len) {
-		$res = substr($body, 0, $len);
-		$body = substr($body, $len);
-
-		return $res;
-	}
-
-	public static function load($jwsTokenString) {
-		$parts = explode('.', $jwsTokenString);
-		if(isset($parts[1])) {
-			$payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
-
-			return $payload;
+		$skinToken = $this->decodeToken($this->get($this->getLInt()));
+		if(isset($skinToken["ClientRandomId"])) {
+			$this->clientId = $skinToken["ClientRandomId"];
 		}
+		if(isset($skinToken["ServerAddress"])) {
+			$this->serverAddress = $skinToken["ServerAddress"];
+		}
+		if(isset($skinToken["SkinData"])) {
+			$this->skin = base64_decode($skinToken["SkinData"]);
+		}
+		if(isset($skinToken["SkinId"])) {
+			$this->skinId = $skinToken["SkinId"];
+		}
+	}
 
-		return "";
+	public function decodeToken($token) {
+		$tokens = explode(".", $token);
+		list($headB64, $payloadB64, $sigB64) = $tokens;
+
+		return json_decode(base64_decode($payloadB64), true);
 	}
 
 	public function encode() {
-
 	}
-
 }

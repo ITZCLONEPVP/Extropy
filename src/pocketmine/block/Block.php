@@ -38,7 +38,6 @@ use pocketmine\metadata\MetadataValue;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 
-
 class Block extends Position implements BlockIds, Metadatable {
 
 	/** @var \SplFixedArray */
@@ -410,7 +409,6 @@ class Block extends Position implements BlockIds, Metadatable {
 	 * @return void
 	 */
 	public function onUpdate($type) {
-
 	}
 
 	/**
@@ -596,7 +594,6 @@ class Block extends Position implements BlockIds, Metadatable {
 	}
 
 	public function addVelocityToEntity(Entity $entity, Vector3 $vector) {
-
 	}
 
 	/**
@@ -743,7 +740,6 @@ class Block extends Position implements BlockIds, Metadatable {
 	 * @param Entity $entity
 	 */
 	public function onEntityCollide(Entity $entity) {
-
 	}
 
 	/**

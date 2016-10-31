@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class IronBoots extends Armor {
 
 	const SLOT_NUMBER = 3;

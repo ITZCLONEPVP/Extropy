@@ -21,7 +21,6 @@
 
 namespace pocketmine\item;
 
-
 class StoneAxe extends Tool {
 
 	public function __construct($meta = 0, $count = 1) {

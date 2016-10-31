@@ -21,7 +21,6 @@
 
 namespace pocketmine\tile;
 
-
 interface Nameable {
 
 

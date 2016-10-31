@@ -141,7 +141,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 		if(isset($reset)) {
 			$this->foodTickTimer = 0;
 		}
-
 	}
 
 	public function addSaturation(float $amount) {
@@ -169,7 +168,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 					$this->heal(1, new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_SATURATION));
 					$this->exhaust(3.0);
 					$this->foodTickTimer = 0;
-
 				}
 			} elseif($food === 0) {
 				$this->foodTickTimer++;

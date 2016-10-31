@@ -29,7 +29,6 @@ class PackedIce extends Solid {
 	protected $id = self::PACKED_ICE;
 
 	public function __construct() {
-
 	}
 
 	public function getName() : string {

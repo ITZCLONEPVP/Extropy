@@ -21,7 +21,6 @@
 
 namespace pocketmine;
 
-
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\plugin\Plugin;
