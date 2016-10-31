@@ -6,7 +6,6 @@ use pocketmine\entity\monster\Monster;
 use pocketmine\entity\monster\walking\Wolf;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Timings;
 use pocketmine\level\Level;
 use pocketmine\level\Location;
 use pocketmine\level\Position;

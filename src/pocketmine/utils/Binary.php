@@ -32,10 +32,6 @@ class Binary {
 	const BIG_ENDIAN = 0x00;
 	const LITTLE_ENDIAN = 0x01;
 
-	private static function checkLength($str, $expected) {
-		assert(($len = strlen($str)) === $expected, "Expected $expected bytes, got $len");
-	}
-
 	/**
 	 * Reads a 3-byte big-endian number
 	 *
@@ -45,7 +41,12 @@ class Binary {
 	 */
 	public static function readTriad($str) {
 		self::checkLength($str, 3);
+
 		return @unpack("N", "\x00" . $str)[1];
+	}
+
+	private static function checkLength($str, $expected) {
+		assert(($len = strlen($str)) === $expected, "Expected $expected bytes, got $len");
 	}
 
 	/**
@@ -68,6 +69,7 @@ class Binary {
 	 */
 	public static function readLTriad($str) {
 		self::checkLength($str, 3);
+
 		return @unpack("V", $str . "\x00")[1];
 	}
 
@@ -130,17 +132,6 @@ class Binary {
 	}
 
 	/**
-	 * Writes an unsigned/signed byte
-	 *
-	 * @param $c
-	 *
-	 * @return string
-	 */
-	public static function writeByte($c) {
-		return chr($c);
-	}
-
-	/**
 	 * Writes a 16-bit signed/unsigned little-endian number
 	 *
 	 * @param $value
@@ -161,46 +152,6 @@ class Binary {
 
 	public static function writeLLong($value) {
 		return strrev(self::writeLong($value));
-	}
-
-	public static function readVarInt($stream) {
-		$shift = PHP_INT_SIZE === 8 ? 63 : 31;
-		$raw = self::readUnsignedVarInt($stream);
-		$temp = ((($raw << $shift) >> $shift) ^ $raw) >> 1;
-		return $temp ^ ($raw & (1 << $shift));
-	}
-
-	public static function readUnsignedVarInt(BinaryStream $stream) {
-		$value = 0;
-		$i = 0;
-		do {
-			if($i > 63 ) throw new \InvalidArgumentException("Varint did't terminate after 10 bytes!");;
-			$value |= ((($b = $stream->getByte()) & 0x7f) << $i);
-			$i += 7;
-		} while($b & 0x80);
-
-		return $value;
-	}
-
-	public static function writeVarInt($v) {
-		return self::writeUnsignedVarInt(($v << 1) ^ ($v >> (PHP_INT_SIZE === 8 ? 63 : 31)));
-	}
-
-	public static function writeUnsignedVarInt($v) {
-		$buf = "";
-		$loops = 0;
-		do {
-			if($loops > 9) throw new \InvalidArgumentException("Varint cannot be longer than 10 bytes!");
-			$w = $v & 0x7f;
-			if(($v >> 7) !== 0) {
-				$w = $v | 0x80;
-			}
-			$buf .= self::writeByte($w);
-			$v = (($v >> 7) & (PHP_INT_MAX >> 6));
-			$loops++;
-		} while($v);
-
-		return $buf;
 	}
 
 	public static function writeLong($value) {
@@ -231,6 +182,58 @@ class Binary {
 	 */
 	public static function writeShort($value) {
 		return pack("n", $value);
+	}
+
+	public static function readVarInt($stream) {
+		$shift = PHP_INT_SIZE === 8 ? 63 : 31;
+		$raw = self::readUnsignedVarInt($stream);
+		$temp = ((($raw << $shift) >> $shift) ^ $raw) >> 1;
+
+		return $temp ^ ($raw & (1 << $shift));
+	}
+
+	public static function readUnsignedVarInt(BinaryStream $stream) {
+		$value = 0;
+		$i = 0;
+		do {
+			if($i > 63) throw new \InvalidArgumentException("Varint did't terminate after 10 bytes!");;
+			$value |= ((($b = $stream->getByte()) & 0x7f) << $i);
+			$i += 7;
+		} while($b & 0x80);
+
+		return $value;
+	}
+
+	public static function writeVarInt($v) {
+		return self::writeUnsignedVarInt(($v << 1) ^ ($v >> (PHP_INT_SIZE === 8 ? 63 : 31)));
+	}
+
+	public static function writeUnsignedVarInt($v) {
+		$buf = "";
+		$loops = 0;
+		do {
+			if($loops > 9) throw new \InvalidArgumentException("Varint cannot be longer than 10 bytes!");
+			$w = $v & 0x7f;
+			if(($v >> 7) !== 0) {
+				$w = $v | 0x80;
+			}
+			$buf .= self::writeByte($w);
+			$v = (($v >> 7) & (PHP_INT_MAX >> 6));
+			$loops++;
+		} while($v);
+
+		return $buf;
+	}
+
+	/**
+	 * Writes an unsigned/signed byte
+	 *
+	 * @param $c
+	 *
+	 * @return string
+	 */
+	public static function writeByte($c) {
+		return chr($c);
 	}
 
 	/**
@@ -297,29 +300,6 @@ class Binary {
 	}
 
 	/**
-	 * Reads an unsigned/signed byte
-	 *
-	 * @param string $c
-	 * @param bool $signed
-	 *
-	 * @return int
-	 */
-	public static function readByte($c, $signed = true) {
-		self::checkLength($c, 1);
-		$b = ord($c{0});
-
-		if($signed) {
-			if(PHP_INT_SIZE === 8) {
-				return $b << 56 >> 56;
-			} else {
-				return $b << 24 >> 24;
-			}
-		} else {
-			return $b;
-		}
-	}
-
-	/**
 	 * Reads a 16-bit unsigned little-endian number
 	 *
 	 * @param      $str
@@ -328,6 +308,7 @@ class Binary {
 	 */
 	public static function readLShort($str) {
 		self::checkLength($str, 2);
+
 		return @unpack("v", $str)[1];
 	}
 
@@ -342,6 +323,7 @@ class Binary {
 
 	public static function readLFloat($str) {
 		self::checkLength($str, 4);
+
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("f", strrev($str))[1] : @unpack("f", $str)[1];
 	}
 
@@ -379,6 +361,7 @@ class Binary {
 	 */
 	public static function readShort($str) {
 		self::checkLength($str, 2);
+
 		return @unpack("n", $str)[1];
 	}
 
@@ -391,6 +374,29 @@ class Binary {
 	 */
 	public static function readBool($b) {
 		return self::readByte($b, false) === 0 ? false : true;
+	}
+
+	/**
+	 * Reads an unsigned/signed byte
+	 *
+	 * @param string $c
+	 * @param bool $signed
+	 *
+	 * @return int
+	 */
+	public static function readByte($c, $signed = true) {
+		self::checkLength($c, 1);
+		$b = ord($c{0});
+
+		if($signed) {
+			if(PHP_INT_SIZE === 8) {
+				return $b << 56 >> 56;
+			} else {
+				return $b << 24 >> 24;
+			}
+		} else {
+			return $b;
+		}
 	}
 
 	/**
@@ -451,6 +457,7 @@ class Binary {
 
 	public static function readFloat($str) {
 		self::checkLength($str, 4);
+
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("f", $str)[1] : @unpack("f", strrev($str))[1];
 	}
 
@@ -464,6 +471,7 @@ class Binary {
 
 	public static function readDouble($str) {
 		self::checkLength($str, 8);
+
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("d", $str)[1] : @unpack("d", strrev($str))[1];
 	}
 
@@ -473,6 +481,7 @@ class Binary {
 
 	public static function readLDouble($str) {
 		self::checkLength($str, 8);
+
 		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("d", strrev($str))[1] : @unpack("d", $str)[1];
 	}
 

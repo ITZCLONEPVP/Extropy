@@ -60,14 +60,14 @@ namespace {
 		}
 	}
 
-	function dummy() {}
+	function dummy() {
+	}
 }
 
 namespace pocketmine {
 
 	use pocketmine\utils\Binary;
 	use pocketmine\utils\MainLogger;
-	use pocketmine\utils\ServerKiller;
 	use pocketmine\utils\Terminal;
 	use pocketmine\utils\Utils;
 	use pocketmine\wizard\Installer;
@@ -458,8 +458,8 @@ namespace pocketmine {
 		$thread->quit();
 	}
 
-//	$killer = new ServerKiller(8);
-//	$killer->start();
+	//	$killer = new ServerKiller(8);
+	//	$killer->start();
 
 	$logger->shutdown();
 	$logger->join();

@@ -30,9 +30,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
-use pocketmine\tile\Tile;
 use pocketmine\utils\ChunkException;
 
 class McRegion extends BaseLevelProvider {
@@ -72,16 +70,12 @@ class McRegion extends BaseLevelProvider {
 	}
 
 	public static function generate($path, $name, $seed, array $options = []) {
-		if(!file_exists($path)) {
-			mkdir($path, 0777, true);
-		}
+		if(!file_exists($path)) mkdir($path, 0777, true);
 
-		if(!file_exists($path . "/region")) {
-			mkdir($path . "/region", 0777);
-		}
+		if(!file_exists($path . "/region")) mkdir($path . "/region", 0777);
 		//TODO, add extra details
 		$levelData = new CompoundTag("Data", ["hardcore" => new ByteTag("hardcore", 0), "initialized" => new ByteTag("initialized", 1), "GameType" => new IntTag("GameType", 0), "generatorVersion" => new IntTag("generatorVersion", 1), //2 in MCPE
-			"SpawnX" => new IntTag("SpawnX", 256), "SpawnY" => new IntTag("SpawnY", 70), "SpawnZ" => new IntTag("SpawnZ", 256), "version" => new IntTag("version", 19133), "DayTime" => new IntTag("DayTime", 0), "LastPlayed" => new LongTag("LastPlayed", microtime(true) * 1000), "RandomSeed" => new LongTag("RandomSeed", $seed), "SizeOnDisk" => new LongTag("SizeOnDisk", 0), "Time" => new LongTag("Time", 0), "generatorName" => new StringTag("generatorName", "FLAT"), "generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""), "LevelName" => new StringTag("LevelName", $name), "GameRules" => new CompoundTag("GameRules", [])]);
+			"SpawnX" => new IntTag("SpawnX", 128), "SpawnY" => new IntTag("SpawnY", 70), "SpawnZ" => new IntTag("SpawnZ", 128), "version" => new IntTag("version", 19133), "DayTime" => new IntTag("DayTime", 0), "LastPlayed" => new LongTag("LastPlayed", microtime(true) * 1000), "RandomSeed" => new LongTag("RandomSeed", $seed), "SizeOnDisk" => new LongTag("SizeOnDisk", 0), "Time" => new LongTag("Time", 0), "generatorName" => new StringTag("generatorName", "Default"), "generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""), "LevelName" => new StringTag("LevelName", $name), "GameRules" => new CompoundTag("GameRules", [])]);
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setData(new CompoundTag("", ["Data" => $levelData]));
 		$buffer = $nbt->writeCompressed();

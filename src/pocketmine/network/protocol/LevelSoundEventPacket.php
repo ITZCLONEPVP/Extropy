@@ -23,19 +23,27 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-class LevelSoundEventPacket extends DataPacket{
+class LevelSoundEventPacket extends DataPacket {
+
 	const NETWORK_ID = Info::LEVEL_SOUND_EVENT_PACKET;
 
 	public $sound;
+
 	public $x;
+
 	public $y;
+
 	public $z;
+
 	public $volume;
+
 	public $pitch;
+
 	public $unknownBool;
+
 	public $unknownBool2;
 
-	public function decode(){
+	public function decode() {
 		$this->sound = $this->getByte();
 		$this->getVector3f($this->x, $this->y, $this->z);
 		$this->volume = $this->getVarInt();
@@ -44,7 +52,7 @@ class LevelSoundEventPacket extends DataPacket{
 		$this->unknownBool2 = $this->getBool();
 	}
 
-	public function encode(){
+	public function encode() {
 		$this->reset();
 		$this->putByte($this->sound);
 		$this->putVector3f($this->x, $this->y, $this->z);

@@ -295,14 +295,7 @@ abstract class Entity extends Location implements Metadatable {
 	protected $dataFlags = 0;
 
 	/** @var array */
-	protected $dataProperties = [
-		self::DATA_FLAGS => [self::DATA_TYPE_LONG, 0],
-		self::DATA_AIR => [self::DATA_TYPE_SHORT, 400],
-		self::DATA_MAX_AIR => [self::DATA_TYPE_SHORT, 400],
-		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
-		self::DATA_LEAD_HOLDER_EID => [self::DATA_TYPE_LONG, -1],
-		self::DATA_SCALE => [self::DATA_TYPE_FLOAT, 1],
-	];
+	protected $dataProperties = [self::DATA_FLAGS => [self::DATA_TYPE_LONG, 0], self::DATA_AIR => [self::DATA_TYPE_SHORT, 400], self::DATA_MAX_AIR => [self::DATA_TYPE_SHORT, 400], self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""], self::DATA_LEAD_HOLDER_EID => [self::DATA_TYPE_LONG, -1], self::DATA_SCALE => [self::DATA_TYPE_FLOAT, 1],];
 
 	/** @var EntityDamageEvent */
 	protected $lastDamageCause = null;
@@ -516,6 +509,66 @@ abstract class Entity extends Location implements Metadatable {
 		$this->level->updateEntities[$this->id] = $this;
 	}
 
+	public function setMotion(Vector3 $motion) {
+		if(!$this->justCreated) {
+			$this->server->getPluginManager()->callEvent($ev = new EntityMotionEvent($this, $motion));
+			if($ev->isCancelled()) {
+				return false;
+			}
+		}
+
+		$this->motionX = $motion->x;
+		$this->motionY = $motion->y;
+		$this->motionZ = $motion->z;
+
+		if(!$this->justCreated) {
+			$this->updateMovement();
+		}
+
+		return true;
+	}
+
+	protected function updateMovement() {
+		$diffPosition = ($this->x - $this->lastX) ** 2 + ($this->y - $this->lastY) ** 2 + ($this->z - $this->lastZ) ** 2;
+		$diffRotation = ($this->yaw - $this->lastYaw) ** 2 + ($this->pitch - $this->lastPitch) ** 2;
+
+		$diffMotion = ($this->motionX - $this->lastMotionX) ** 2 + ($this->motionY - $this->lastMotionY) ** 2 + ($this->motionZ - $this->lastMotionZ) ** 2;
+
+		if($diffPosition > 0.04 or $diffRotation > 2.25 and ($diffMotion > 0.0001 and $this->getMotion()->lengthSquared() <= 0.00001)) { //0.2 ** 2, 1.5 ** 2
+			$this->lastX = $this->x;
+			$this->lastY = $this->y;
+			$this->lastZ = $this->z;
+
+			$this->lastYaw = $this->yaw;
+			$this->lastPitch = $this->pitch;
+
+			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+		}
+
+		if($diffMotion > 0.0025 or ($diffMotion > 0.0001 and $this->getMotion()->lengthSquared() <= 0.0001)) { //0.05 ** 2
+			$this->lastMotionX = $this->motionX;
+			$this->lastMotionY = $this->motionY;
+			$this->lastMotionZ = $this->motionZ;
+
+			$this->level->addEntityMotion($this->getViewers(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
+		}
+	}
+
+	public function getMotion() {
+		return new Vector3($this->motionX, $this->motionY, $this->motionZ);
+	}
+
+	/**
+	 * @return Player[]
+	 */
+	public function getViewers() {
+		return $this->hasSpawned;
+	}
+
+	public function getEyeHeight() {
+		return $this->eyeHeight;
+	}
+
 	protected function initEntity() {
 		if(isset($this->namedtag->ActiveEffects)) {
 			foreach($this->namedtag->ActiveEffects->getValue() as $e) {
@@ -688,13 +741,31 @@ abstract class Entity extends Location implements Metadatable {
 	}
 
 	/**
+	 * @param $propertyId
+	 * @param $id
 	 * @param bool $value
+	 * @param int $type
 	 */
-	public function setNameTagAlwaysVisible($value = true) {
-		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, $value);
+	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_LONG) {
+		if($this->getDataFlag($propertyId, $id) !== $value) {
+			$flags = (int)$this->getDataProperty($propertyId);
+			$flags ^= 1 << $id;
+			$this->setDataProperty($propertyId, $type, $flags);
+		}
 	}
 
-	protected function addAttributes() {}
+	/**
+	 * @param int $propertyId
+	 * @param int $id
+	 *
+	 * @return bool
+	 */
+	public function getDataFlag($propertyId, $id) {
+		return (((int)$this->getDataProperty($propertyId)) & (1 << $id)) > 0;
+	}
+
+	protected function addAttributes() {
+	}
 
 	/**
 	 * @param int|string $type
@@ -733,6 +804,13 @@ abstract class Entity extends Location implements Metadatable {
 	}
 
 	/**
+	 * @param bool $value
+	 */
+	public function setNameTagAlwaysVisible($value = true) {
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, $value);
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getNameTag() {
@@ -751,32 +829,8 @@ abstract class Entity extends Location implements Metadatable {
 		return $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE, $value);
 	}
 
-	/**
-	 * @param int $propertyId
-	 * @param int $id
-	 *
-	 * @return bool
-	 */
-	public function getDataFlag($propertyId, $id) {
-		return (((int)$this->getDataProperty($propertyId)) & (1 << $id)) > 0;
-	}
-
 	public function setSneaking($value = true) {
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING, (bool)$value);
-	}
-
-	/**
-	 * @param $propertyId
-	 * @param $id
-	 * @param bool $value
-	 * @param int $type
-	 */
-	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_LONG) {
-		if($this->getDataFlag($propertyId, $id) !== $value) {
-			$flags = (int)$this->getDataProperty($propertyId);
-			$flags ^= 1 << $id;
-			$this->setDataProperty($propertyId, $type, $flags);
-		}
 	}
 
 	public function setSprinting($value = true) {
@@ -973,6 +1027,7 @@ abstract class Entity extends Location implements Metadatable {
 			$this->removeAllEffects();
 			$this->despawnFromAll();
 			if(!$isPlayer) $this->close();
+
 			return false;
 		}
 
@@ -1096,10 +1151,6 @@ abstract class Entity extends Location implements Metadatable {
 		return false;
 	}
 
-	public function getEyeHeight() {
-		return $this->eyeHeight;
-	}
-
 	public function isCollideWithTransparent() {
 		$block = $this->level->getBlock($this->temporalVector->setComponents(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
 		if(!($block instanceof Ladder) && !($block instanceof Fire)) {
@@ -1152,43 +1203,6 @@ abstract class Entity extends Location implements Metadatable {
 	public function extinguish() {
 		$this->fireTicks = 0;
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ONFIRE, false);
-	}
-
-	protected function updateMovement() {
-		$diffPosition = ($this->x - $this->lastX) ** 2 + ($this->y - $this->lastY) ** 2 + ($this->z - $this->lastZ) ** 2;
-		$diffRotation = ($this->yaw - $this->lastYaw) ** 2 + ($this->pitch - $this->lastPitch) ** 2;
-
-		$diffMotion = ($this->motionX - $this->lastMotionX) ** 2 + ($this->motionY - $this->lastMotionY) ** 2 + ($this->motionZ - $this->lastMotionZ) ** 2;
-
-		if($diffPosition > 0.04 or $diffRotation > 2.25 and ($diffMotion > 0.0001 and $this->getMotion()->lengthSquared() <= 0.00001)) { //0.2 ** 2, 1.5 ** 2
-			$this->lastX = $this->x;
-			$this->lastY = $this->y;
-			$this->lastZ = $this->z;
-
-			$this->lastYaw = $this->yaw;
-			$this->lastPitch = $this->pitch;
-
-			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
-		}
-
-		if($diffMotion > 0.0025 or ($diffMotion > 0.0001 and $this->getMotion()->lengthSquared() <= 0.0001)) { //0.05 ** 2
-			$this->lastMotionX = $this->motionX;
-			$this->lastMotionY = $this->motionY;
-			$this->lastMotionZ = $this->motionZ;
-
-			$this->level->addEntityMotion($this->getViewers(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
-		}
-	}
-
-	public function getMotion() {
-		return new Vector3($this->motionX, $this->motionY, $this->motionZ);
-	}
-
-	/**
-	 * @return Player[]
-	 */
-	public function getViewers() {
-		return $this->hasSpawned;
 	}
 
 	public function isOnFire() {
@@ -1583,25 +1597,6 @@ abstract class Entity extends Location implements Metadatable {
 		}
 
 		return false;
-	}
-
-	public function setMotion(Vector3 $motion) {
-		if(!$this->justCreated) {
-			$this->server->getPluginManager()->callEvent($ev = new EntityMotionEvent($this, $motion));
-			if($ev->isCancelled()) {
-				return false;
-			}
-		}
-
-		$this->motionX = $motion->x;
-		$this->motionY = $motion->y;
-		$this->motionZ = $motion->z;
-
-		if(!$this->justCreated) {
-			$this->updateMovement();
-		}
-
-		return true;
 	}
 
 	public function respawnToAll() {

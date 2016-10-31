@@ -445,29 +445,29 @@ class PluginManager {
 
 		if($op === true) {
 			return $this->defSubsOp;
-//			foreach($this->defSubsOp as $k => $perm) {
-//				/** @var \WeakRef $perm */
-//				if($perm->acquire()) {
-//					$subs[] = $perm->get();
-//					$perm->release();
-//				} else {
-//					unset($this->defSubsOp[$k]);
-//				}
-//			}
+			//			foreach($this->defSubsOp as $k => $perm) {
+			//				/** @var \WeakRef $perm */
+			//				if($perm->acquire()) {
+			//					$subs[] = $perm->get();
+			//					$perm->release();
+			//				} else {
+			//					unset($this->defSubsOp[$k]);
+			//				}
+			//			}
 		} else {
 			return $this->defSubs;
-//			foreach($this->defSubs as $k => $perm) {
-//				/** @var \WeakRef $perm */
-//				if($perm->acquire()) {
-//					$subs[] = $perm->get();
-//					$perm->release();
-//				} else {
-//					unset($this->defSubs[$k]);
-//				}
-//			}
+			//			foreach($this->defSubs as $k => $perm) {
+			//				/** @var \WeakRef $perm */
+			//				if($perm->acquire()) {
+			//					$subs[] = $perm->get();
+			//					$perm->release();
+			//				} else {
+			//					unset($this->defSubs[$k]);
+			//				}
+			//			}
 		}
 
-//		return $subs;
+		//		return $subs;
 	}
 
 	/**
@@ -503,18 +503,18 @@ class PluginManager {
 	public function getPermissionSubscriptions($permission) {
 		if(isset($this->permSubs[$permission])) {
 			return $this->permSubs[$permission];
-//			$subs = [];
-//			foreach($this->permSubs[$permission] as $k => $perm) {
-//				/** @var \WeakRef $perm */
-//				if($perm->acquire()) {
-//					$subs[] = $perm->get();
-//					$perm->release();
-//				} else {
-//					unset($this->permSubs[$permission][$k]);
-//				}
-//			}
+			//			$subs = [];
+			//			foreach($this->permSubs[$permission] as $k => $perm) {
+			//				/** @var \WeakRef $perm */
+			//				if($perm->acquire()) {
+			//					$subs[] = $perm->get();
+			//					$perm->release();
+			//				} else {
+			//					unset($this->permSubs[$permission][$k]);
+			//				}
+			//			}
 
-//			return $subs;
+			//			return $subs;
 		}
 
 		return [];

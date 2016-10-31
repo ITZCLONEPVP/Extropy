@@ -422,6 +422,7 @@ class Utils {
 	 */
 	public static function getRandomBytes($length = 16, $secure = true, $raw = true, $startEntropy = "", &$rounds = 0, &$drop = 0) {
 		$raw_output = random_bytes($length);
+
 		return $raw ? $raw_output : bin2hex($raw_output);
 	}
 

@@ -29,26 +29,47 @@ class StartGamePacket extends DataPacket {
 	const NETWORK_ID = Info::START_GAME_PACKET;
 
 	public $entityUniqueId;
+
 	public $entityRuntimeId;
+
 	public $x;
+
 	public $y;
+
 	public $z;
+
 	public $seed;
+
 	public $dimension;
+
 	public $generator = 1; //default infinite - 0 old, 1 infinite, 2 flat
+
 	public $gamemode;
+
 	public $difficulty;
+
 	public $spawnX;
+
 	public $spawnY;
+
 	public $spawnZ;
+
 	public $hasAchievementsDisabled = 1;
+
 	public $dayCycleStopTime = -1; //-1 = not stopped, any positive value = stopped at that time
+
 	public $eduMode = 0;
+
 	public $rainLevel;
+
 	public $lightningLevel;
+
 	public $commandsEnabled;
+
 	public $isTexturePacksRequired = 0;
+
 	public $unknown = "iX8AANxLbgA=";
+
 	public $worldName;
 
 	public function decode() {

@@ -23,21 +23,27 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-class AddHangingEntityPacket extends DataPacket{
+class AddHangingEntityPacket extends DataPacket {
+
 	const NETWORK_ID = Info::ADD_HANGING_ENTITY_PACKET;
 
 	public $entityUniqueId;
+
 	public $entityRuntimeId;
+
 	public $x;
+
 	public $y;
+
 	public $z;
+
 	public $unknown;
 
-	public function decode(){
+	public function decode() {
 
 	}
 
-	public function encode(){
+	public function encode() {
 		$this->reset();
 		$this->putVarInt($this->entityUniqueId);
 		$this->putVarInt($this->entityRuntimeId);

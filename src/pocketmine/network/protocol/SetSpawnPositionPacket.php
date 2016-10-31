@@ -33,6 +33,7 @@ class SetSpawnPositionPacket extends DataPacket {
 	public $y;
 
 	public $z;
+
 	public $unknownBool;
 
 	public function decode() {

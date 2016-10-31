@@ -29,6 +29,7 @@ class DisconnectPacket extends DataPacket {
 	const NETWORK_ID = Info::DISCONNECT_PACKET;
 
 	public $hideDisconnectScreen = false;
+
 	public $message;
 
 	public function decode() {

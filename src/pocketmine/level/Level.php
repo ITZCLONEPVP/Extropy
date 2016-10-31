@@ -61,7 +61,6 @@ use pocketmine\event\level\LevelUnloadEvent;
 use pocketmine\event\level\SpawnChangeEvent;
 use pocketmine\event\LevelTimings;
 use pocketmine\event\player\PlayerInteractEvent;
-use pocketmine\event\Timings;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
 use pocketmine\level\format\Chunk;
@@ -79,7 +78,6 @@ use pocketmine\level\particle\Particle;
 use pocketmine\level\sound\Sound;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Math;
-use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\metadata\BlockMetadataStore;
 use pocketmine\metadata\Metadatable;
@@ -840,9 +838,9 @@ class Level implements ChunkManager, Metadatable {
 
 		$this->checkTime();
 
-//		if(($currentTick % 200) === 0) {
-//			$this->sendTime();
-//		}
+		//		if(($currentTick % 200) === 0) {
+		//			$this->sendTime();
+		//		}
 
 		$this->unloadChunks();
 
@@ -964,18 +962,6 @@ class Level implements ChunkManager, Metadatable {
 		}
 	}
 
-	/**
-	 * WARNING: Do not use this, it's only for internal use.
-	 * Changes to this function won't be recorded on the version.
-	 */
-	public function sendTime() {
-		$pk = new SetTimePacket();
-		$pk->time = (int)$this->time;
-		$pk->started = $this->stopTime == false;
-
-		Server::broadcastPacket($this->players, $pk);
-	}
-
 	protected function unloadChunks() {
 		if(count($this->unloadQueue) > 0 && !$this->isFrozen) {
 			$X = null;
@@ -1028,6 +1014,7 @@ class Level implements ChunkManager, Metadatable {
 	private function tickChunks() {
 		if($this->chunksPerTick <= 0 or count($this->players) === 0) {
 			$this->chunkTickList = [];
+
 			return;
 		}
 
@@ -2328,6 +2315,18 @@ class Level implements ChunkManager, Metadatable {
 	public function setTime($time) {
 		$this->time = (int)$time;
 		$this->sendTime();
+	}
+
+	/**
+	 * WARNING: Do not use this, it's only for internal use.
+	 * Changes to this function won't be recorded on the version.
+	 */
+	public function sendTime() {
+		$pk = new SetTimePacket();
+		$pk->time = (int)$this->time;
+		$pk->started = $this->stopTime == false;
+
+		Server::broadcastPacket($this->players, $pk);
 	}
 
 	/**

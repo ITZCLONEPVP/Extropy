@@ -34,6 +34,7 @@ class RequestChunkRadiusPacket extends DataPacket {
 		$this->radius = $this->getVarInt();
 	}
 
-	public function encode() {}
+	public function encode() {
+	}
 
 }

@@ -121,7 +121,6 @@ use pocketmine\utils\Cache;
 use pocketmine\utils\Config;
 use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
-use pocketmine\utils\ServerException;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
@@ -465,6 +464,7 @@ class Server {
 		if(!($this->getDefaultLevel() instanceof Level)) {
 			$this->getLogger()->emergency("No default level has been loaded");
 			$this->forceShutdown();
+
 			return;
 		}
 
@@ -510,6 +510,7 @@ class Server {
 	 */
 	public function getProperty($variable, $defaultValue = null) {
 		$value = $this->config->getNested($variable);
+
 		return $value === null ? $defaultValue : $value;
 	}
 
@@ -883,9 +884,7 @@ class Server {
 
 		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", @Utils::getRandomBytes(4, false))[1]) : (int)$seed;
 
-		if(($provider = LevelProviderManager::getProviderByName($providerName = $this->getProperty("level-settings.default-format", "mcregion"))) === null) {
-			$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
-		}
+		$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
 
 		try {
 			$path = $this->getDataPath() . "worlds/" . $name . "/";
@@ -1086,6 +1085,13 @@ class Server {
 
 		$this->tickProcessor();
 		$this->forceShutdown();
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMotd() {
+		return $this->getConfigString("motd", "Minecraft: PE Server");
 	}
 
 	/**
@@ -1478,13 +1484,6 @@ class Server {
 	 */
 	public function getDefaultGamemode() {
 		return $this->getConfigInt("gamemode", 0) & 0b11;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getMotd() {
-		return $this->getConfigString("motd", "Minecraft: PE Server");
 	}
 
 	/**
@@ -2075,6 +2074,7 @@ class Server {
 			$dump = new CrashDump($this);
 		} catch(\Exception $e) {
 			$this->logger->critical("Could not create Crash Dump: " . $e->getMessage());
+
 			return;
 		}
 

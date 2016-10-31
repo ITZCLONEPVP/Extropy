@@ -33,13 +33,21 @@ class MovePlayerPacket extends DataPacket {
 	const MODE_ROTATION = 2;
 
 	public $eid;
+
 	public $x;
+
 	public $y;
+
 	public $z;
+
 	public $yaw;
+
 	public $bodyYaw;
+
 	public $pitch;
+
 	public $mode = self::MODE_NORMAL;
+
 	public $onGround;
 
 	public function clean() {

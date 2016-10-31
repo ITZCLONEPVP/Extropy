@@ -63,7 +63,7 @@ class NBT {
 	const TAG_Double = 6;
 	const TAG_ByteArray = 7;
 	const TAG_String = 8;
-	const TAG_Enum = 9;
+	const TAG_List = 9;
 	const TAG_Compound = 10;
 	const TAG_IntArray = 11;
 
@@ -86,8 +86,8 @@ class NBT {
 	 *
 	 * @return CompoundTag
 	 */
-	public static function putItemHelper(Item $item, $slot = null, $tagName = "Item") {
-		$tag = new CompoundTag($tagName, ["id" => new ShortTag("id", $item->getId()), "Count" => new ByteTag("Count", $item->getCount()), "Damage" => new ShortTag("Damage", $item->getDamage())]);
+	public static function putItemHelper(Item $item, $slot = null) {
+		$tag = new CompoundTag(null, ["id" => new ShortTag("id", $item->getId()), "Count" => new ByteTag("Count", $item->getCount()), "Damage" => new ShortTag("Damage", $item->getDamage())]);
 
 		if($slot !== null) {
 			$tag->Slot = new ByteTag("Slot", (int)$slot);
@@ -110,15 +110,8 @@ class NBT {
 		if(!isset($tag->id) or !isset($tag->Count)) {
 			return Item::get(0);
 		}
-		if($tag->id instanceof ShortTag) {
-			$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
-		} elseif($tag->id instanceof StringTag) { // PC Item entity save format
-			$item = Item::fromString($tag->id->getValue());
-			$item->setDamage(!isset($tag->Damage) ? 0 : $tag->Damage->getValue());
-			$item->setCount($tag->Count->getValue());
-		} else {
-			throw new \InvalidArgumentException("Item ID must be an instance of StringTag or ShortTag, " . get_class($tag->id) . " given");
-		}
+
+		$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
 
 		if(isset($tag->tag) and $tag->tag instanceof CompoundTag) {
 			$item->setNamedTag($tag->tag);
@@ -191,6 +184,20 @@ class NBT {
 		return true;
 	}
 
+	public static function combineCompoundTags(CompoundTag $tag1, CompoundTag $tag2, bool $override = false) : CompoundTag {
+		$tag1 = clone $tag1;
+		foreach($tag2 as $k => $v) {
+			if(!($v instanceof Tag)) {
+				continue;
+			}
+			if(!isset($tag1->{$k}) or (isset($tag1->{$k}) and $override)) {
+				$tag1->{$k} = clone $v;
+			}
+		}
+
+		return $tag1;
+	}
+
 	public static function parseJSON($data, &$offset = 0) {
 		$len = strlen($data);
 		for(; $offset < $len; ++$offset) {
@@ -249,7 +256,7 @@ class NBT {
 				case NBT::TAG_String:
 					$data[$key] = new StringTag($key, $value);
 					break;
-				case NBT::TAG_Enum:
+				case NBT::TAG_List:
 					$data[$key] = new ListTag($key, $value);
 					break;
 				case NBT::TAG_Compound:
@@ -323,7 +330,7 @@ class NBT {
 				}
 				++$offset;
 				$value = self::parseList($data, $offset);
-				$type = self::TAG_Enum;
+				$type = self::TAG_List;
 				break;
 			} else {
 				$value .= $c;
@@ -424,9 +431,9 @@ class NBT {
 					$data[$key] = new ByteArrayTag($key, $value);
 					break;
 				case NBT::TAG_String:
-					$data[$key] = new ByteTag($key, $value);
+					$data[$key] = new StringTag($key, $value);
 					break;
-				case NBT::TAG_Enum:
+				case NBT::TAG_List:
 					$data[$key] = new ListTag($key, $value);
 					break;
 				case NBT::TAG_Compound:
@@ -461,10 +468,6 @@ class NBT {
 		$this->buffer .= $v;
 	}
 
-	public function feof() {
-		return !isset($this->buffer{$this->offset});
-	}
-
 	public function readCompressed($buffer) {
 		$this->read(zlib_decode($buffer));
 	}
@@ -482,13 +485,9 @@ class NBT {
 		$this->buffer = "";
 	}
 
-	public function readNetworkCompressed($buffer) {
-		$this->read(zlib_decode($buffer), false, true);
-	}
-
 	public function readTag(bool $network = false) {
 		if($this->feof()) {
-			$tagType = -1;
+			$tagType = -1; //prevent crashes for empty tags
 		} else {
 			$tagType = $this->getByte();
 		}
@@ -525,7 +524,7 @@ class NBT {
 				$tag = new StringTag($this->getString($network));
 				$tag->read($this, $network);
 				break;
-			case NBT::TAG_Enum:
+			case NBT::TAG_List:
 				$tag = new ListTag($this->getString($network));
 				$tag->read($this, $network);
 				break;
@@ -547,8 +546,12 @@ class NBT {
 		return $tag;
 	}
 
+	public function feof() {
+		return !isset($this->buffer{$this->offset});
+	}
+
 	public function getByte() {
-		return ord($this->get(1));
+		return Binary::readByte($this->get(1));
 	}
 
 	public function get($len) {
@@ -565,7 +568,16 @@ class NBT {
 
 	public function getString(bool $network = false) {
 		$len = $network ? $this->getByte() : $this->getShort();
+
 		return $this->get($len);
+	}
+
+	public function getShort() {
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readShort($this->get(2)) : Binary::readLShort($this->get(2));
+	}
+
+	public function readNetworkCompressed($buffer) {
+		$this->read(zlib_decode($buffer), false, true);
 	}
 
 	public function writeCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7) {
@@ -576,17 +588,8 @@ class NBT {
 		return false;
 	}
 
-	public function writeNetworkCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7) {
-		if(($write = $this->write(true)) !== false){
-			return zlib_encode($write, $compression, $level);
-		}
-		return false;
-	}
-
 	/**
-	 * @param bool $network
-	 *
-	 * @return bool|string
+	 * @return string|bool
 	 */
 	public function write(bool $network = false) {
 		$this->offset = 0;
@@ -608,46 +611,51 @@ class NBT {
 	}
 
 	public function writeTag(Tag $tag, bool $network = false) {
-		$this->buffer .= chr($tag->getType());
-		if($tag instanceof NamedTag) {
+		$this->putByte($tag->getType());
+		if($tag instanceof NamedTAG) {
 			$this->putString($tag->getName(), $network);
 		}
 		$tag->write($this, $network);
 	}
 
+	public function putByte($v) {
+		$this->buffer .= Binary::writeByte($v);
+	}
+
 	public function putString($v, bool $network = false) {
-		if($network) {
-			$this->putByte($v);
+		if($network === true) {
+			$this->putByte(strlen($v));
 		} else {
-			$this->putShort($v);
+			$this->putShort(strlen($v));
 		}
 		$this->buffer .= $v;
 	}
 
-	public function putByte($v) {
-		$this->buffer .= chr($v);
-	}
-
-	public function getShort() {
-		return $this->endianness === self::BIG_ENDIAN ? unpack("n", $this->get(2))[1] : unpack("v", $this->get(2))[1];
-	}
-
 	public function putShort($v) {
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("n", $v) : pack("v", $v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeShort($v) : Binary::writeLShort($v);
+	}
+
+	public function writeNetworkCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7) {
+		if(($write = $this->write(true)) !== false) {
+			return zlib_encode($write, $compression, $level);
+		}
+
+		return false;
 	}
 
 	public function getInt(bool $network = false) {
-		if($network) {
+		if($network === true) {
 			return Binary::readVarInt($this);
 		}
-		return $this->endianness === self::BIG_ENDIAN ? (PHP_INT_SIZE === 8 ? unpack("N", $this->get(4))[1] << 32 >> 32 : unpack("N", $this->get(4))[1]) : (PHP_INT_SIZE === 8 ? unpack("V", $this->get(4))[1] << 32 >> 32 : unpack("V", $this->get(4))[1]);
+
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readInt($this->get(4)) : Binary::readLInt($this->get(4));
 	}
 
 	public function putInt($v, bool $network = false) {
-		if($network) {
+		if($network === true) {
 			$this->buffer .= Binary::writeVarInt($v);
 		} else {
-			$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
+			$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeInt($v) : Binary::writeLInt($v);
 		}
 	}
 
@@ -660,19 +668,19 @@ class NBT {
 	}
 
 	public function getFloat() {
-		return $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? unpack("f", $this->get(4))[1] : unpack("f", strrev($this->get(4)))[1]) : (ENDIANNESS === 0 ? unpack("f", strrev($this->get(4)))[1] : unpack("f", $this->get(4))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readFloat($this->get(4)) : Binary::readLFloat($this->get(4));
 	}
 
 	public function putFloat($v) {
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? pack("f", $v) : strrev(pack("f", $v))) : (ENDIANNESS === 0 ? strrev(pack("f", $v)) : pack("f", $v));
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeFloat($v) : Binary::writeLFloat($v);
 	}
 
 	public function getDouble() {
-		return $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? unpack("d", $this->get(8))[1] : unpack("d", strrev($this->get(8)))[1]) : (ENDIANNESS === 0 ? unpack("d", strrev($this->get(8)))[1] : unpack("d", $this->get(8))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readDouble($this->get(8)) : Binary::readLDouble($this->get(8));
 	}
 
 	public function putDouble($v) {
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? pack("d", $v) : strrev(pack("d", $v))) : (ENDIANNESS === 0 ? strrev(pack("d", $v)) : pack("d", $v));
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeDouble($v) : Binary::writeLDouble($v);
 	}
 
 	public function getArray() {

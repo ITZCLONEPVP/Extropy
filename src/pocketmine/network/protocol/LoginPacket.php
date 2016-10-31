@@ -33,19 +33,33 @@ class LoginPacket extends DataPacket {
 	const POCKET_EDITION = 0;
 
 	public $gameEdition;
+
 	public $username;
+
 	public $protocol1;
+
 	public $protocol2;
+
 	public $clientId;
+
 	public $clientUUID;
+
 	public $serverAddress;
+
 	public $clientSecret;
+
 	public $slim = false;
+
 	public $skinName;
+
 	public $chainsDataLength;
+
 	public $chains;
+
 	public $playerDataLength;
+
 	public $playerData;
+
 	public $isValidProtocol = true;
 
 	public function decode() {
@@ -53,6 +67,7 @@ class LoginPacket extends DataPacket {
 		$this->protocol1 = $this->getInt();
 		if(!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
+
 			return;
 		}
 

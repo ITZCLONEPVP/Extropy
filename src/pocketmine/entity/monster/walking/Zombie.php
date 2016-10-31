@@ -7,7 +7,6 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\monster\WalkingMonster;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Timings;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 

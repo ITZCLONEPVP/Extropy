@@ -59,6 +59,7 @@ class BanEntry {
 				$date = \DateTime::createFromFormat(self::$format, array_shift($str));
 				if(!($date instanceof \DateTime)) {
 					MainLogger::getLogger()->alert("Error parsing date for BanEntry for player \"" . $entry->getName() . "\", the format may be invalid!");
+
 					return $entry;
 				}
 				$entry->setCreated($date);
@@ -78,6 +79,10 @@ class BanEntry {
 
 			return $entry;
 		}
+	}
+
+	public function getName() {
+		return $this->name;
 	}
 
 	public function setCreated(\DateTime $date) {
@@ -110,10 +115,6 @@ class BanEntry {
 		$str .= $this->getReason();
 
 		return $str;
-	}
-
-	public function getName() {
-		return $this->name;
 	}
 
 	public function getCreated() {

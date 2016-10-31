@@ -66,6 +66,7 @@ class BinaryStream extends \stdClass {
 		} elseif($len === true) {
 			$str = substr($this->buffer, $this->offset);
 			$this->offset = strlen($this->buffer);
+
 			return $str;
 		}
 
@@ -106,14 +107,6 @@ class BinaryStream extends \stdClass {
 
 	public function putFloat($v) {
 		$this->buffer .= Binary::writeFloat($v);
-	}
-
-	public function getLFloat() {
-		return Binary::readLFloat($this->get(4));
-	}
-
-	public function putLFloat($v) {
-		$this->buffer .= Binary::writeLFloat($v);
 	}
 
 	public function getLTriad() {
@@ -157,11 +150,19 @@ class BinaryStream extends \stdClass {
 	}
 
 	public function getBool() : bool {
-		return (bool) $this->getByte();
+		return (bool)$this->getByte();
+	}
+
+	public function getByte() {
+		return ord($this->buffer{$this->offset++});
 	}
 
 	public function putBool($v) {
-		$this->putByte((bool) $v);
+		$this->putByte((bool)$v);
+	}
+
+	public function putByte($v) {
+		$this->buffer .= chr($v);
 	}
 
 	public function getUUID() {
@@ -173,7 +174,7 @@ class BinaryStream extends \stdClass {
 	}
 
 	public function getSlot() {
-		$id = $this->getVarInt(true);
+		$id = $this->getVarInt();
 
 		if($id <= 0) {
 			return Item::get(0, 0, 0);
@@ -193,16 +194,16 @@ class BinaryStream extends \stdClass {
 		return Item::get($id, $data, $cnt, $nbt);
 	}
 
-	public function getShort($signed = true) {
-		return $signed ? Binary::readSignedShort($this->get(2)) : Binary::readShort($this->get(2));
-	}
-
-	public function getByte() {
-		return ord($this->buffer{$this->offset++});
+	public function getVarInt() {
+		return Binary::readVarInt($this);
 	}
 
 	public function getLShort($signed = true) {
 		return $signed ? Binary::readSignedLShort($this->get(2)) : Binary::readLShort($this->get(2));
+	}
+
+	public function getShort($signed = true) {
+		return $signed ? Binary::readSignedShort($this->get(2)) : Binary::readShort($this->get(2));
 	}
 
 	public function putSlot(Item $item) {
@@ -220,12 +221,12 @@ class BinaryStream extends \stdClass {
 		$this->put($nbt);
 	}
 
-	public function putShort($v) {
-		$this->buffer .= Binary::writeShort($v);
+	public function putVarInt($v) {
+		$this->put(Binary::writeVarInt($v));
 	}
 
-	public function putByte($v) {
-		$this->buffer .= chr($v);
+	public function putShort($v) {
+		$this->buffer .= Binary::writeShort($v);
 	}
 
 	public function putLShort($v) {
@@ -236,25 +237,17 @@ class BinaryStream extends \stdClass {
 		return $this->get($this->getUnsignedVarInt());
 	}
 
+	public function getUnsignedVarInt() {
+		return Binary::readUnsignedVarInt($this);
+	}
+
 	public function putString($v) {
 		$this->putUnsignedVarInt(strlen($v));
 		$this->put($v);
 	}
 
-	public function getUnsignedVarInt() {
-		return Binary::readUnsignedVarInt($this);
-	}
-
 	public function putUnsignedVarInt($v) {
 		$this->put(Binary::writeUnsignedVarInt($v));
-	}
-
-	public function getVarInt() {
-		return Binary::readVarInt($this);
-	}
-
-	public function putVarInt($v) {
-		$this->put(Binary::writeVarInt($v));
 	}
 
 	public function getBlockCoords(&$x, &$y, &$z) {
@@ -275,9 +268,17 @@ class BinaryStream extends \stdClass {
 		$z = $this->getLFloat();
 	}
 
+	public function getLFloat() {
+		return Binary::readLFloat($this->get(4));
+	}
+
 	public function putVector3f($x, $y, $z) {
 		$this->putLFloat($x);
 		$this->putLFloat($y);
 		$this->putLFloat($z);
+	}
+
+	public function putLFloat($v) {
+		$this->buffer .= Binary::writeLFloat($v);
 	}
 }

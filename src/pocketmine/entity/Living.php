@@ -94,6 +94,7 @@ abstract class Living extends Entity implements Damageable {
 					$this->close();
 				}
 			}
+
 			return $this->deadTicks < 10;
 		}
 

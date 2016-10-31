@@ -22,38 +22,34 @@
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
-use pocketmine\command\Command;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 
 
-class DumpMemoryCommand extends VanillaCommand{
-	
-	public function __construct($name){
-		parent::__construct(
-			$name,
-			"Dumps the memory",
-			"/$name [path]"
-		);
+class DumpMemoryCommand extends VanillaCommand {
+
+	public function __construct($name) {
+		parent::__construct($name, "Dumps the memory", "/$name [path]");
 		$this->setPermission("pocketmine.command.dumpmemory");
 	}
 
-	public function execute(CommandSender $sender, $currentAlias, array $args){
-		if(!$this->testPermission($sender)){
+	public function execute(CommandSender $sender, $currentAlias, array $args) {
+		if(!$this->testPermission($sender)) {
 			return true;
 		}
 
 		$sender->sendMessage("Dumping server memory...");
 
-		$this->dumpServerMemory(isset($args[0]) ? $args[0] : $sender->getServer()->getDataPath() . "/memory_dumps/memoryDump_".date("D_M_j-H.i.s-T_Y", time()), 48, 80);
+		$this->dumpServerMemory(isset($args[0]) ? $args[0] : $sender->getServer()->getDataPath() . "/memory_dumps/memoryDump_" . date("D_M_j-H.i.s-T_Y", time()), 48, 80);
+
 		return true;
 	}
 
-	public function dumpServerMemory($outputFolder, $maxNesting, $maxStringSize){
+	public function dumpServerMemory($outputFolder, $maxNesting, $maxStringSize) {
 		gc_disable();
-		ini_set("memory_limit",-1);
-		if(!file_exists($outputFolder)){
+		ini_set("memory_limit", -1);
+		if(!file_exists($outputFolder)) {
 			mkdir($outputFolder, 0777, true);
 		}
 
@@ -73,10 +69,10 @@ class DumpMemoryCommand extends VanillaCommand{
 
 		$this->continueDump($server, $data, $objects, $refCounts, 0, $maxNesting, $maxStringSize);
 
-		do{
+		do {
 			$continue = false;
-			foreach($objects as $hash => $object){
-				if(!is_object($object)){
+			foreach($objects as $hash => $object) {
+				if(!is_object($object)) {
 					continue;
 				}
 				$continue = true;
@@ -87,40 +83,37 @@ class DumpMemoryCommand extends VanillaCommand{
 
 				$reflection = new \ReflectionObject($object);
 
-				$info = [
-					"information" => "$hash@$className",
-					"properties" => []
-				];
+				$info = ["information" => "$hash@$className", "properties" => []];
 
-				if($reflection->getParentClass()){
+				if($reflection->getParentClass()) {
 					$info["parent"] = $reflection->getParentClass()->getName();
 				}
 
-				if(count($reflection->getInterfaceNames()) > 0){
+				if(count($reflection->getInterfaceNames()) > 0) {
 					$info["implements"] = implode(", ", $reflection->getInterfaceNames());
 				}
 
-				foreach($reflection->getProperties() as $property){
-					if($property->isStatic()){
+				foreach($reflection->getProperties() as $property) {
+					if($property->isStatic()) {
 						continue;
 					}
 
-					if(!$property->isPublic()){
+					if(!$property->isPublic()) {
 						$property->setAccessible(true);
 					}
 					$this->continueDump($property->getValue($object), $info["properties"][$property->getName()], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
 				}
 
-				fwrite($obData, "$hash@$className: ". json_encode($info, JSON_UNESCAPED_SLASHES) . "\n");
+				fwrite($obData, "$hash@$className: " . json_encode($info, JSON_UNESCAPED_SLASHES) . "\n");
 
-				if(!isset($objects["staticProperties"][$className])){
+				if(!isset($objects["staticProperties"][$className])) {
 					$staticProperties[$className] = [];
-					foreach($reflection->getProperties() as $property){
-						if(!$property->isStatic() or $property->getDeclaringClass()->getName() !== $className){
+					foreach($reflection->getProperties() as $property) {
+						if(!$property->isStatic() or $property->getDeclaringClass()->getName() !== $className) {
 							continue;
 						}
 
-						if(!$property->isPublic()){
+						if(!$property->isPublic()) {
 							$property->setAccessible(true);
 						}
 						$this->continueDump($property->getValue($object), $staticProperties[$className][$property->getName()], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
@@ -129,7 +122,7 @@ class DumpMemoryCommand extends VanillaCommand{
 			}
 
 			$server->getLogger()->notice(TextFormat::GOLD . "[Dump] Wrote " . count($objects) . " objects");
-		}while($continue);
+		} while($continue);
 
 		file_put_contents($outputFolder . "/staticProperties.json", json_encode($staticProperties, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 		file_put_contents($outputFolder . "/serverEntry.json", json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
@@ -142,16 +135,17 @@ class DumpMemoryCommand extends VanillaCommand{
 		$server->forceShutdown();
 	}
 
-	private function continueDump($from, &$data, &$objects, &$refCounts, $recursion, $maxNesting, $maxStringSize){
-		if($maxNesting <= 0){
+	private function continueDump($from, &$data, &$objects, &$refCounts, $recursion, $maxNesting, $maxStringSize) {
+		if($maxNesting <= 0) {
 			$data = "(error) NESTING LIMIT REACHED";
+
 			return;
 		}
 
 		--$maxNesting;
 
-		if(is_object($from)){
-			if(!isset($objects[$hash = spl_object_hash($from)])){
+		if(is_object($from)) {
+			if(!isset($objects[$hash = spl_object_hash($from)])) {
 				$objects[$hash] = $from;
 				$refCounts[$hash] = 0;
 			}
@@ -159,22 +153,23 @@ class DumpMemoryCommand extends VanillaCommand{
 			++$refCounts[$hash];
 
 			$data = "(object) $hash@" . get_class($from);
-		}elseif(is_array($from)){
-			if($recursion >= 5){
+		} elseif(is_array($from)) {
+			if($recursion >= 5) {
 				$data = "(error) ARRAY RECURSION LIMIT REACHED";
+
 				return;
 			}
 			$data = [];
-			foreach($from as $key => $value){
+			foreach($from as $key => $value) {
 				$this->continueDump($value, $data[$key], $objects, $refCounts, $recursion + 1, $maxNesting, $maxStringSize);
 			}
-		}elseif(is_string($from)){
-			$data = "(string) len(".strlen($from).") " . substr(Utils::printable($from), 0, $maxStringSize);
-		}elseif(is_resource($from)){
+		} elseif(is_string($from)) {
+			$data = "(string) len(" . strlen($from) . ") " . substr(Utils::printable($from), 0, $maxStringSize);
+		} elseif(is_resource($from)) {
 			$data = "(resource) " . print_r($from, true);
-		}else{
+		} else {
 			$data = $from;
 		}
 	}
-	
+
 }

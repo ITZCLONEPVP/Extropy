@@ -23,7 +23,8 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-class CommandStepPacket extends DataPacket{
+class CommandStepPacket extends DataPacket {
+
 	const NETWORK_ID = Info::COMMAND_STEP_PACKET;
 
 	/**
@@ -39,15 +40,22 @@ class CommandStepPacket extends DataPacket{
 	 */
 
 	public $command;
+
 	public $overload;
+
 	public $uvarint1;
+
 	public $uvarint2;
+
 	public $bool;
+
 	public $uvarint64;
+
 	public $args; //JSON formatted command arguments
+
 	public $string4;
 
-	public function decode(){
+	public function decode() {
 		$this->command = $this->getString();
 		$this->overload = $this->getString();
 		$this->uvarint1 = $this->getUnsignedVarInt();
@@ -56,12 +64,12 @@ class CommandStepPacket extends DataPacket{
 		$this->uvarint64 = $this->getUnsignedVarInt(); //TODO: varint64
 		$this->args = json_decode($this->getString());
 		$this->string4 = $this->getString();
-		while(!$this->feof()){
+		while(!$this->feof()) {
 			$this->getByte(); //prevent assertion errors. TODO: find out why there are always 3 extra bytes at the end of this packet.
 		}
 	}
 
-	public function encode(){
+	public function encode() {
 
 	}
 

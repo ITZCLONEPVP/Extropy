@@ -8,7 +8,6 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\monster\walking\Enderman;
 use pocketmine\entity\WalkingEntity;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Timings;
 use pocketmine\math\Math;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
