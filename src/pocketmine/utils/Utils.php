@@ -418,6 +418,8 @@ class Utils {
 	 * @param int &$drop Will be set to the amount of dropped bytes
 	 *
 	 * @return string
+	 *
+	 * @deprecated
 	 */
 	public static function getRandomBytes($length = 16, $secure = true, $raw = true, $startEntropy = "", &$rounds = 0, &$drop = 0) {
 		$raw_output = random_bytes($length);

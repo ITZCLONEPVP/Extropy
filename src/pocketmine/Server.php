@@ -312,7 +312,7 @@ class Server {
 			@file_put_contents($this->dataPath . "pocketmine.yml", $content);
 		}
 		$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
-		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, ["motd" => "Extropy Server", "server-port" => 19132, "memory-limit" => "256M", "white-list" => false, "max-players" => 20, "allow-flight" => false, "spawn-animals" => true, "animals-limit" => 0, "spawn-mobs" => true, "mobs-limit" => 0, "gamemode" => 0, "force-gamemode" => false, "hardcore" => false, "pvp" => true, "difficulty" => 1, "generator-settings" => "", "level-name" => "world", "level-seed" => "", "level-type" => "DEFAULT", "enable-query" => true, "enable-rcon" => false, "rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10), "auto-save" => true, "auto-generate" => false]);
+		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, ["motd" => "Extropy Server", "server-port" => 19132, "memory-limit" => "256M", "white-list" => false, "max-players" => 20, "allow-flight" => false, "spawn-animals" => true, "animals-limit" => 0, "spawn-mobs" => true, "mobs-limit" => 0, "gamemode" => 0, "force-gamemode" => false, "hardcore" => false, "pvp" => true, "difficulty" => 1, "generator-settings" => "", "level-name" => "world", "level-seed" => "", "level-type" => "DEFAULT", "enable-query" => true, "enable-rcon" => false, "rcon.password" => substr(base64_encode(random_bytes(20)), 3, 10), "auto-save" => true, "auto-generate" => false]);
 
 		ServerScheduler::$WORKERS = $this->getProperty("settings.async-workers", 8);
 
@@ -379,7 +379,7 @@ class Server {
 		}
 
 		$this->logger->info("Starting Minecraft: PE server on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
-		define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
+		define("BOOTUP_RANDOM", random_bytes(16));
 		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
 
 		$this->addInterface($this->mainInterface = new RakLibInterface($this));
@@ -876,7 +876,7 @@ class Server {
 			return false;
 		}
 
-		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", random_bytes(4))[1]) : (int)$seed;
+		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", random_bytes(4))[1] << 32 >> 32 : unpack("N", random_bytes(4))[1]) : (int)$seed;
 
 		$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
 
@@ -1443,7 +1443,7 @@ class Server {
 	/**
 	 * @return int
 	 *
-	 * @deprecated true
+	 * @deprecated
 	 */
 	public function getSpawnRadius() {
 		return 0;
