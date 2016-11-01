@@ -23,6 +23,8 @@ namespace pocketmine\nbt\tag;
 
 use pocketmine\nbt\NBT;
 
+#include <rules/NBT.h>
+
 class IntArrayTag extends NamedTag {
 
 	public function getType() {
@@ -37,5 +39,11 @@ class IntArrayTag extends NamedTag {
 	public function write(NBT $nbt, bool $network = false) {
 		$nbt->putInt(count($this->value), $network);
 		$nbt->put(pack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", ...$this->value));
+	}
+
+	public function __toString() {
+		$str = get_class($this) . "{\n";
+		$str .= implode(", ", $this->value);
+		return $str . "}";
 	}
 }

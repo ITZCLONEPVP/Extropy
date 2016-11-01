@@ -68,11 +68,8 @@ class NBT {
 	const TAG_IntArray = 11;
 
 	public $buffer;
-
 	public $endianness;
-
 	private $offset;
-
 	private $data;
 
 	public function __construct($endianness = self::LITTLE_ENDIAN) {
@@ -111,7 +108,15 @@ class NBT {
 			return Item::get(0);
 		}
 
-		$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
+		if($tag->id instanceof ShortTag) {
+			$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
+		} elseif($tag->id instanceof StringTag) { //PC item save format
+			$item = Item::fromString($tag->id->getValue());
+			$item->setDamage(!isset($tag->Damage) ? 0 : $tag->Damage->getValue());
+			$item->setCount($tag->Count->getValue());
+		} else {
+			throw new \InvalidArgumentException("Item CompoundTag ID must be an instance of StringTag or ShortTag, " . get_class($tag->id) . " given");
+		}
 
 		if(isset($tag->tag) and $tag->tag instanceof CompoundTag) {
 			$item->setNamedTag($tag->tag);
@@ -184,20 +189,6 @@ class NBT {
 		return true;
 	}
 
-	public static function combineCompoundTags(CompoundTag $tag1, CompoundTag $tag2, bool $override = false) : CompoundTag {
-		$tag1 = clone $tag1;
-		foreach($tag2 as $k => $v) {
-			if(!($v instanceof Tag)) {
-				continue;
-			}
-			if(!isset($tag1->{$k}) or (isset($tag1->{$k}) and $override)) {
-				$tag1->{$k} = clone $v;
-			}
-		}
-
-		return $tag1;
-	}
-
 	public static function parseJSON($data, &$offset = 0) {
 		$len = strlen($data);
 		for(; $offset < $len; ++$offset) {
@@ -205,7 +196,6 @@ class NBT {
 			if($c === "{") {
 				++$offset;
 				$data = self::parseCompound($data, $offset);
-
 				return new CompoundTag("", $data);
 			} elseif($c !== " " and $c !== "\r" and $c !== "\n" and $c !== "\t") {
 				throw new \Exception("Syntax error: unexpected '$c' at offset $offset");
@@ -541,7 +531,6 @@ class NBT {
 				$tag = new EndTag;
 				break;
 		}
-
 		return $tag;
 	}
 
@@ -556,7 +545,6 @@ class NBT {
 	public function get($len) {
 		if($len < 0) {
 			$this->offset = strlen($this->buffer) - 1;
-
 			return "";
 		} elseif($len === true) {
 			return substr($this->buffer, $this->offset);
@@ -567,7 +555,6 @@ class NBT {
 
 	public function getString(bool $network = false) {
 		$len = $network ? $this->getByte() : $this->getShort();
-
 		return $this->get($len);
 	}
 
@@ -602,7 +589,6 @@ class NBT {
 			foreach($this->data as $tag) {
 				$this->writeTag($tag, $network);
 			}
-
 			return $this->buffer;
 		}
 
@@ -611,7 +597,7 @@ class NBT {
 
 	public function writeTag(Tag $tag, bool $network = false) {
 		$this->putByte($tag->getType());
-		if($tag instanceof NamedTAG) {
+		if($tag instanceof NamedTag) {
 			$this->putString($tag->getName(), $network);
 		}
 		$tag->write($this, $network);
@@ -646,7 +632,6 @@ class NBT {
 		if($network === true) {
 			return Binary::readVarInt($this);
 		}
-
 		return $this->endianness === self::BIG_ENDIAN ? Binary::readInt($this->get(4)) : Binary::readLInt($this->get(4));
 	}
 

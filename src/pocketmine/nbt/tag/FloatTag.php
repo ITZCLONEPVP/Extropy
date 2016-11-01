@@ -36,6 +36,6 @@ class FloatTag extends NamedTag {
 	}
 
 	public function write(NBT $nbt, bool $network = false) {
-		$nbt->buffer .= $nbt->putFloat($this->value);
+		$nbt->putFloat($this->value);
 	}
 }

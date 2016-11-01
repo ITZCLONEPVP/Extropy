@@ -2,8 +2,12 @@
 
 namespace pocketmine;
 
+use pocketmine\level\format\mcregion\Chunk;
+use pocketmine\nbt\NBT;
 use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\tile\Spawnable;
 use pocketmine\utils\Binary;
+use pocketmine\utils\BinaryStream;
 
 class ChunkMaker extends Worker {
 
@@ -66,7 +70,7 @@ class ChunkMaker extends Worker {
 
 	protected function tick() {
 		while(count($this->internalQueue) > 0) {
-			$data = unserialize($this->readMainToThreadPacket());
+			$data = $this->readMainToThreadPacket();
 			$this->doChunk($data);
 		}
 	}
@@ -76,28 +80,35 @@ class ChunkMaker extends Worker {
 	}
 
 	protected function doChunk($data) {
-		$offset = 8;
-		$blockIdArray = substr($data["chunk"], $offset, 32768);
-		$offset += 32768;
-		$blockDataArray = substr($data["chunk"], $offset, 16384);
-		$offset += 16384;
-		$skyLightArray = substr($data["chunk"], $offset, 16384);
-		$offset += 16384;
-		$blockLightArray = substr($data["chunk"], $offset, 16384);
-		$offset += 16384;
-		$heightMapArray = array_values(unpack("C*", substr($data["chunk"], $offset, 256)));
-		$offset += 256;
-		$biomeColorArray = array_values(unpack("N*", substr($data["chunk"], $offset, 1024)));
+		$chunk = Chunk::fromFastBinary($data);
 
-		$ordered = $blockIdArray . $blockDataArray . $skyLightArray . $blockLightArray . pack("C*", ...$heightMapArray) . pack("N*", ...$biomeColorArray) . Binary::writeLInt(0) . $data["tiles"];
+		$tiles = "";
+		if(count($rawTiles = $chunk->getTiles()) > 0) {
+			$nbt = new NBT(NBT::LITTLE_ENDIAN);
+			$list = [];
+			foreach($rawTiles as $tile) {
+				if($tile instanceof Spawnable) {
+					$list[] = $tile->getSpawnCompound();
+				}
+			}
+			$nbt->setData($list);
+			$tiles = $nbt->write(true);
+		}
+
+		$extraData = new BinaryStream();
+		$extraData->putLInt(count($dataArray = $chunk->getBlockExtraDataArray()));
+		foreach($dataArray as $key => $value) {
+			$extraData->putLInt($key);
+			$extraData->putLShort($value);
+		}
+
+		$ordered = $chunk->getBlockIdArray() . $chunk->getBlockDataArray() . $chunk->getBlockSkyLightArray() . $chunk->getBlockLightArray() . pack("C*", ...$chunk->getHeightMapArray()) . pack("N*", ...$chunk->getBiomeColorArray()) . $extraData->getBuffer() . $tiles;
 
 		$result = [];
-		$result["chunkX"] = $data["chunkX"];
-		$result["chunkZ"] = $data["chunkZ"];
 
 		$pk = new FullChunkDataPacket();
-		$pk->chunkX = $data["chunkX"];
-		$pk->chunkZ = $data["chunkZ"];
+		$pk->chunkX = $result["chunkX"] = $chunk->getX();
+		$pk->chunkZ = $result["chunkZ"] = $chunk->getZ();
 		$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
 		$pk->data = $ordered;
 		$pk->encode();

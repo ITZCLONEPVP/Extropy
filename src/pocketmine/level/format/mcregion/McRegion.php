@@ -30,7 +30,6 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\tile\Spawnable;
 use pocketmine\utils\ChunkException;
 
 class McRegion extends BaseLevelProvider {
@@ -90,24 +89,7 @@ class McRegion extends BaseLevelProvider {
 		$chunk = $this->getChunk($x, $z, false);
 		if(!$chunk instanceof Chunk) throw new ChunkException("Invalid Chunk sent");
 
-		$data = [];
-		$data["chunkX"] = $x;
-		$data["chunkZ"] = $z;
-		$data["tiles"] = "";
-
-		if(count($rawTiles = $chunk->getTiles()) > 0) {
-			$nbt = new NBT(NBT::LITTLE_ENDIAN);
-			foreach($rawTiles as $tile) {
-				if($tile instanceof Spawnable) {
-					$nbt->setData($tile->getSpawnCompound());
-					$data ["tiles"] .= $nbt->write(true);
-				}
-			}
-		}
-
-		$data["chunk"] = $chunk->toFastBinary();
-
-		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
+		$this->getLevel()->chunkMaker->pushMainToThreadPacket($chunk->toFastBinary());
 
 		return null;
 	}

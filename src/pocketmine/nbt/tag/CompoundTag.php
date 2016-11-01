@@ -32,7 +32,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	 * @param NamedTag[] $value
 	 */
 	public function __construct($name = "", $value = []) {
-		$this->name = $name;
+		$this->__name = $name;
 		foreach($value as $tag) {
 			$this->{$tag->getName()} = $tag;
 		}
@@ -61,6 +61,8 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 				return $this->{$offset}->getValue();
 			}
 		}
+
+		assert(false, "Offset $offset not found");
 
 		return null;
 	}
@@ -107,7 +109,6 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 				$str .= get_class($tag) . ":" . $tag->__toString() . "\n";
 			}
 		}
-
 		return $str . "}";
 	}
 }

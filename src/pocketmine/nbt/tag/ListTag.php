@@ -24,12 +24,14 @@ namespace pocketmine\nbt\tag;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ListTag as TagEnum;
 
+#include <rules/NBT.h>
+
 class ListTag extends NamedTag implements \ArrayAccess, \Countable {
 
 	private $tagType;
 
 	public function __construct($name = "", $value = []) {
-		$this->name = $name;
+		$this->__name = $name;
 		foreach($value as $k => $v) {
 			$this->{$k} = $v;
 		}
@@ -192,7 +194,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable {
 			$this->tagType = $id;
 		}
 
-		$nbt->buffer .= chr($this->tagType);
+		$nbt->putByte($this->tagType);
 
 		/** @var Tag[] $tags */
 		$tags = [];
@@ -214,7 +216,6 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable {
 				$str .= get_class($tag) . ":" . $tag->__toString() . "\n";
 			}
 		}
-
 		return $str . "}";
 	}
 }

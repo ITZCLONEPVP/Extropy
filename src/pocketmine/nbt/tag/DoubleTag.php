@@ -36,6 +36,6 @@ class DoubleTag extends NamedTag {
 	}
 
 	public function write(NBT $nbt, bool $network = false) {
-		$nbt->buffer .= $nbt->getDouble();
+		$nbt->putDouble($this->value);
 	}
 }

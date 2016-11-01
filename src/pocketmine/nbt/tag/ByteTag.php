@@ -32,10 +32,10 @@ class ByteTag extends NamedTag {
 	}
 
 	public function read(NBT $nbt, bool $network = false) {
-		$this->value = ord($nbt->get(1));
+		$this->value = $nbt->getByte();
 	}
 
 	public function write(NBT $nbt, bool $network = false) {
-		$nbt->buffer .= chr($this->value);
+		$nbt->putByte($this->value);
 	}
 }
