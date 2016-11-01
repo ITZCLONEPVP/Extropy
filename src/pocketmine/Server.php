@@ -77,7 +77,6 @@ use pocketmine\inventory\CraftingManager;
 use pocketmine\inventory\InventoryType;
 use pocketmine\inventory\Recipe;
 use pocketmine\item\Item;
-use pocketmine\level\format\anvil\Anvil;
 use pocketmine\level\format\LevelProviderManager;
 use pocketmine\level\format\mcregion\McRegion;
 use pocketmine\level\generator\biome\Biome;
@@ -434,7 +433,7 @@ class Server {
 
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 
-		LevelProviderManager::addProvider($this, Anvil::class);
+		//LevelProviderManager::addProvider($this, Anvil::class);
 		LevelProviderManager::addProvider($this, McRegion::class);
 
 		foreach((array)$this->getProperty("worlds", []) as $name => $worldSetting) {
@@ -768,10 +767,6 @@ class Server {
 
 			return false;
 		}
-		//$entities = new Config($path."entities.yml", Config::YAML);
-		//if(file_exists($path . "tileEntities.yml")){
-		//	@rename($path . "tileEntities.yml", $path . "tiles.yml");
-		//}
 
 		try {
 			$level = new Level($this, $name, $path, $provider);
@@ -881,7 +876,7 @@ class Server {
 			return false;
 		}
 
-		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", @Utils::getRandomBytes(4, false))[1]) : (int)$seed;
+		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", random_bytes(4))[1]) : (int)$seed;
 
 		$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
 

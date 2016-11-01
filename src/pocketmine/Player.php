@@ -113,7 +113,6 @@ use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\RespawnPacket;
-use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\protocol\SetSpawnPositionPacket;
@@ -1759,12 +1758,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$pk->spawnX = $spawnPosition->getFloorX();
 				$pk->spawnY = $spawnPosition->getFloorY();
 				$pk->spawnZ = $spawnPosition->getFloorZ();
-				$pk->hasAchievementsDisabled = 0;
+				$pk->hasAchievementsDisabled = 1;
 				$pk->dayCycleStopTime = -1;
 				$pk->eduMode = 0;
 				$pk->rainLevel = 0;
 				$pk->lightningLevel = 0;
 				$pk->commandsEnabled = 1;
+				$pk->levelId = "EXTROPY_SERVER";
 				$pk->worldName = $this->server->getNetwork()->getName();
 				$this->dataPacket($pk);
 
@@ -1779,6 +1779,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 				$this->server->getLogger()->info(TextFormat::DARK_AQUA . $this->username . TextFormat::DARK_GRAY . "/" . TextFormat::GRAY . $this->ip . TextFormat::DARK_AQUA . " connected");
 
+				$this->sendCommandData();
+
+				$this->forceMovement = $this->teleportPosition = $this->getPosition();
+
 				if($this->gamemode === Player::SPECTATOR) {
 					$pk = new ContainerSetContentPacket();
 					$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
@@ -1792,16 +1796,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->dataPacket($pk);
 				}
 
-				$this->sendCommandData();
-
 				$this->server->sendFullPlayerListData($this);
 
 				$this->server->getCraftingManager()->sendRecipeList($this);
-
-				$pk = new SetEntityDataPacket();
-				$pk->eid = 0;
-				$pk->metadata = $this->dataProperties;
-				$this->dataPacket($pk);
 
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:

@@ -120,7 +120,7 @@ class Chunk extends BaseFullChunk {
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 
 		try {
-			$nbt->readCompressed($data, ZLIB_ENCODING_DEFLATE);
+			$nbt->readCompressed($data);
 			$chunk = $nbt->getData();
 
 			if(!isset($chunk->Level) or !($chunk->Level instanceof CompoundTag)) {

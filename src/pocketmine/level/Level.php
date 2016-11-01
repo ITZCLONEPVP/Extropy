@@ -95,7 +95,6 @@ use pocketmine\network\protocol\SetTimePacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
-use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Spawnable;
@@ -1140,10 +1139,7 @@ class Level implements ChunkManager, Metadatable {
 					unset($this->chunkSendQueue[$index]);
 				} else {
 					$this->chunkSendTasks[$index] = true;
-					$task = $this->provider->requestChunkTask($x, $z);
-					if($task instanceof AsyncTask) {
-						$this->server->getScheduler()->scheduleAsyncTask($task);
-					}
+					$this->provider->requestChunkTask($x, $z);
 				}
 			}
 		}
@@ -1153,9 +1149,8 @@ class Level implements ChunkManager, Metadatable {
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (($z) & 0xFFFFFFFF) : ($x) . ":" . ($z);
 		if(isset($this->chunkSendTasks[$index])) {
 
-			if(ADVANCED_CACHE == true) {
-				Cache::add("world:" . $this->getId() . ":" . $index, $payload, 60);
-			}
+			if(ADVANCED_CACHE) Cache::add("world:" . $this->getId() . ":" . $index, $payload, 120);
+
 			foreach($this->chunkSendQueue[$index] as $player) {
 				/** @var Player $player */
 				if($player->isConnected() and isset($player->usedChunks[$index])) {

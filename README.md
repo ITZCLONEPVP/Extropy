@@ -2,7 +2,7 @@ Extropy
 ===================
 __Minecraft: Pocket Edition server software__
 
-## NOTICE: 0.16 IS NOT SUPPORTED YET.
+## NOTICE: This is a development build for 0.16.0
 
 Introduction
 -------------
